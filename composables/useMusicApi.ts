@@ -1,5 +1,5 @@
 import type { Song } from '~/types/music';
-import { CONFIG, FALLBACK_SONGS, GENRES } from '~/constants/config';
+import { CONFIG, FALLBACK_SONGS, GENRES, STORAGE_KEYS } from '~/constants/config';
 
 const songCache = new Map<string, { data: Song[]; timestamp: number; nextPageToken?: string }>();
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
@@ -262,15 +262,125 @@ export const useMusicApi = () => {
     return { formatted, seconds: totalSeconds };
   };
 
-  const getFallbackSongs = (query?: string): Song[] => {
-    let list = [...FALLBACK_SONGS].filter(isSongValid);
-    if (query && query.trim()) {
-      const q = query.toLowerCase();
-      list = list.filter(
-        (s) => s.title.toLowerCase().includes(q) || s.channelTitle.toLowerCase().includes(q)
-      );
+  const getActiveApiKey = (): string => {
+    if (typeof window !== 'undefined') {
+      const customKey = localStorage.getItem(STORAGE_KEYS.CUSTOM_KEY);
+      if (customKey && customKey.trim().startsWith('AIza')) {
+        return customKey.trim();
+      }
     }
-    // Fisher-Yates shuffle
+    const config = useRuntimeConfig();
+    return (config.public.youtubeApiKey as string) || CONFIG.YOUTUBE_API_KEY;
+  };
+
+  const getFallbackSongs = (genreOrQuery?: string, region = CONFIG.DEFAULT_REGION): Song[] => {
+    let list = [...FALLBACK_SONGS].filter(isSongValid);
+
+    const isUzbekSong = (s: Song) => {
+      const text = `${s.title} ${s.channelTitle}`.toLowerCase();
+      const uzbekKeywords = [
+        'uzbek', "o'zbek", 'yulduz', 'xamdam', 'hamdam', 'izzat', 'shahlo', 'ismail',
+        'xojiakbar', 'jaloliddin', 'konsta', 'doston', 'ozodbek', 'tohir', 'shoxrux',
+        'rayhon', 'doxxim', "ulug'bek", 'sevinch', 'shohruhxon', 'ziyoda', 'xurshid',
+        "g'aybulla", 'munisa', 'nilufar', 'lola', 'umidaxon', 'shahzoda', 'abbbose'
+      ];
+      return uzbekKeywords.some((kw) => text.includes(kw));
+    };
+
+    const isAll = !genreOrQuery || !genreOrQuery.trim() || genreOrQuery.toLowerCase() === 'all';
+
+    // Agar 'all' bo'lsa va mintaqa 'UZ' bo'lsa -> O'zbek qo'shiqlarini birinchi o'ringa qo'yish
+    if (isAll) {
+      if (region === 'UZ') {
+        const uzbekList = list.filter(isUzbekSong);
+        const otherList = list.filter((s) => !isUzbekSong(s));
+
+        for (let i = uzbekList.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [uzbekList[i], uzbekList[j]] = [uzbekList[j], uzbekList[i]];
+        }
+        for (let i = otherList.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [otherList[i], otherList[j]] = [otherList[j], otherList[i]];
+        }
+        return [...uzbekList, ...otherList];
+      } else {
+        for (let i = list.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [list[i], list[j]] = [list[j], list[i]];
+        }
+        return list;
+      }
+    }
+
+    const q = genreOrQuery.trim().toLowerCase();
+
+    // 1. Agar janr bo'lsa (uzbek, pop, rap, rock, remix, new, chill)
+    if (q === 'uzbek') {
+      const uzbekList = list.filter(isUzbekSong);
+      for (let i = uzbekList.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [uzbekList[i], uzbekList[j]] = [uzbekList[j], uzbekList[i]];
+      }
+      return uzbekList;
+    }
+
+    const genreKeywords: Record<string, string[]> = {
+      pop: [
+        'ed sheeran', 'katy perry', 'taylor swift', 'bruno mars', 'dua lipa',
+        'maroon 5', 'adele', 'billie eilish', 'shawn mendes', 'lady gaga',
+        'harry styles', 'justin bieber', 'jony', 'munisa', 'rayhon', 'shohruhxon'
+      ],
+      rap: [
+        'eminem', 'wiz khalifa', 'konsta', 'shoxrux', 'doxxim', 'miyagi',
+        'hammali', 'jah khalib', 'xcho', 'abbbose'
+      ],
+      rock: [
+        'queen', 'linkin park', 'imagine dragons', 'metallica', 'coldplay',
+        'onerepublic'
+      ],
+      remix: [
+        'avicii', 'mark ronson', 'chainsmokers', 'alan walker', 'dj', 'remix',
+        'bass', 'boosted'
+      ],
+      chill: [
+        'adele', 'the weeknd', 'billie eilish', 'coldplay', 'passenger',
+        'ismail', 'shahlo', 'ozodbek'
+      ],
+      new: [
+        'dua lipa', 'harry styles', 'the weeknd', 'jony', 'hamdam', 'jaloliddin', 'konsta', 'yulduz'
+      ]
+    };
+
+    if (genreKeywords[q]) {
+      const keywords = genreKeywords[q];
+      const matched = list.filter((s) => {
+        const titleLower = s.title.toLowerCase();
+        const channelLower = s.channelTitle.toLowerCase();
+        return keywords.some((kw) => titleLower.includes(kw) || channelLower.includes(kw));
+      });
+
+      if (matched.length >= 3) {
+        for (let i = matched.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [matched[i], matched[j]] = [matched[j], matched[i]];
+        }
+        return matched;
+      }
+    }
+
+    // 2. Qidiruv so'zi bo'lsa (search query token matching)
+    const words = q.split(/\s+/).filter(Boolean);
+    const searchMatches = list.filter((s) => {
+      const text = `${s.title} ${s.channelTitle}`.toLowerCase();
+      return words.some((w) => text.includes(w));
+    });
+
+    if (searchMatches.length > 0) {
+      return searchMatches;
+    }
+
+    // Agar hech narsa topilmasa, sahifa bo'm-bo'sh qolmasligi uchun barcha zaxira qo'shiqlarni shuffle qilib berish
     for (let i = list.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [list[i], list[j]] = [list[j], list[i]];
@@ -304,8 +414,7 @@ export const useMusicApi = () => {
     genreOrQuery?: string,
     pageToken?: string
   ): Promise<{ songs: Song[]; nextPageToken?: string }> => {
-    const config = useRuntimeConfig();
-    const apiKey = (config.public.youtubeApiKey as string) || CONFIG.YOUTUBE_API_KEY;
+    const apiKey = getActiveApiKey();
     const cacheKey = `chart_v2_${region}_${genreOrQuery || 'all'}_${pageToken || 'p0'}`;
     const cached = songCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
@@ -399,19 +508,20 @@ export const useMusicApi = () => {
       }
 
       if (songs.length === 0) {
-        songs = getFallbackSongs(genreOrQuery);
+        songs = getFallbackSongs(genreOrQuery, region);
+      } else {
+        // Faqat haqiqiy muvaffaqiyatli API natijalarini keshlaymiz
+        songCache.set(cacheKey, {
+          data: songs,
+          timestamp: Date.now(),
+          nextPageToken: nextPageTokenResult
+        });
       }
-
-      songCache.set(cacheKey, {
-        data: songs,
-        timestamp: Date.now(),
-        nextPageToken: nextPageTokenResult
-      });
 
       return { songs, nextPageToken: nextPageTokenResult };
     } catch (e) {
       console.warn('Network error fetching songs. Using fallback catalogue.', e);
-      return { songs: getFallbackSongs(genreOrQuery), nextPageToken: undefined };
+      return { songs: getFallbackSongs(genreOrQuery, region), nextPageToken: undefined };
     }
   };
 
@@ -433,8 +543,7 @@ export const useMusicApi = () => {
       return cached.data;
     }
 
-    const config = useRuntimeConfig();
-    const apiKey = (config.public.youtubeApiKey as string) || CONFIG.YOUTUBE_API_KEY;
+    const apiKey = getActiveApiKey();
 
     try {
       const url = `${CONFIG.API_BASE_URL}/search?part=snippet&type=video&videoCategoryId=${CONFIG.MUSIC_CATEGORY_ID}&regionCode=${encodeURIComponent(
@@ -443,22 +552,22 @@ export const useMusicApi = () => {
 
       const res = await fetch(url);
       if (!res.ok) {
-        return getFallbackSongs(trimmed);
+        return getFallbackSongs(trimmed, region);
       }
 
       const data = await res.json();
       if (!data.items || data.items.length === 0) {
-        return getFallbackSongs(trimmed);
+        return getFallbackSongs(trimmed, region);
       }
 
       const videoIds = data.items.map((it: any) => it.id?.videoId).filter(Boolean);
-      if (videoIds.length === 0) return getFallbackSongs(trimmed);
+      if (videoIds.length === 0) return getFallbackSongs(trimmed, region);
 
       const detailUrl = `${CONFIG.API_BASE_URL}/videos?part=contentDetails,snippet,topicDetails&id=${videoIds.join(
         ','
       )}&key=${apiKey}`;
       const detailRes = await fetch(detailUrl);
-      if (!detailRes.ok) return getFallbackSongs(trimmed);
+      if (!detailRes.ok) return getFallbackSongs(trimmed, region);
 
       const detailData = await detailRes.json();
       const filteredItems = (detailData.items || []).filter(isMusicTrack);
@@ -483,7 +592,7 @@ export const useMusicApi = () => {
       return songs;
     } catch (e) {
       console.warn('Search failed, returning fallback match', e);
-      return getFallbackSongs(trimmed);
+      return getFallbackSongs(trimmed, region);
     }
   };
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'novamusic-pwa-v4';
+const CACHE_NAME = 'novamusic-pwa-v5';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
