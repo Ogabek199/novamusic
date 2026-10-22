@@ -3,10 +3,12 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from '~/composables/useI18n';
 import { useAntiRepeat } from '~/composables/useAntiRepeat';
 import { useYouTubePlayer } from '~/composables/useYouTubePlayer';
+import { usePwaInstall } from '~/composables/usePwaInstall';
 
 const { initLang } = useI18n();
 const { initAntiRepeat, clearAllHistory } = useAntiRepeat();
 const { initYTPlayer } = useYouTubePlayer();
+const { initPwa } = usePwaInstall();
 
 const isCountrySheetOpen = ref(false);
 const isConfirmDialogOpen = ref(false);
@@ -30,6 +32,7 @@ onMounted(() => {
   initLang();
   initAntiRepeat();
   initYTPlayer();
+  initPwa();
 
   const scrollContainer = document.getElementById('scrollContainer');
   const iosNavbar = document.getElementById('iosNavbar');

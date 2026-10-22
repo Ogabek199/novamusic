@@ -67,7 +67,7 @@ const clearSearch = () => {
         </svg>
         <input
           v-model="searchQuery"
-          type="search"
+          type="text"
           id="searchInput"
           :placeholder="t('search_placeholder')"
           autocomplete="off"

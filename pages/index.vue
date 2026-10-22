@@ -52,10 +52,11 @@ const loadSongs = async (reset = true) => {
     isLoadingMore.value = true;
   }
 
-  const genreObj = GENRES.find((g) => g.id === activeGenre.value);
-  const query = genreObj?.query;
-
-  const result = await fetchChartSongs(region.value, query, reset ? undefined : nextPageToken.value);
+  const result = await fetchChartSongs(
+    region.value,
+    activeGenre.value,
+    reset ? undefined : nextPageToken.value
+  );
 
   if (reset) {
     rawSongs.value = result.songs;
@@ -181,11 +182,12 @@ defineExpose({
         id="shuffleSongsBtn"
         @click="shuffleAndPlay"
       >
-        <svg class="sf-icon-sm" viewBox="0 0 24 24">
-          <path
-            fill="currentColor"
-            d="M10.6 13.4l-1.4 1.4-4-4c-.8-.8-.8-2 0-2.8l4-4 1.4 1.4L7.8 8.2c.4.1.8.3 1.1.6l1.7 1.7zm2.8-2.8l1.4-1.4 4 4c.8.8.8 2 0 2.8l-4 4-1.4-1.4 2.8-2.8c-.4-.1-.8-.3-1.1-.6l-1.7-1.7zm1.4 5.6l4 4-1.4 1.4-4-4 1.4-1.4zm-5.6-5.6L5.2 6.6 6.6 5.2l4 4-1.4 1.4z"
-          />
+        <svg class="sf-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 3 21 3 21 8" />
+          <line x1="4" y1="20" x2="21" y2="3" />
+          <polyline points="21 16 21 21 16 21" />
+          <line x1="15" y1="15" x2="21" y2="21" />
+          <line x1="4" y1="4" x2="9" y2="9" />
         </svg>
         <span>{{ t('shuffle_btn') }}</span>
       </button>

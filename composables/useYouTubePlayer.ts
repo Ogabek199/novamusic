@@ -349,6 +349,28 @@ export const useYouTubePlayer = () => {
     isFullPlayerOpen.value = false;
   };
 
+  const closePlayer = () => {
+    if (ytPlayer && isPlayerReady) {
+      try {
+        ytPlayer.stopVideo();
+      } catch (e) {
+        console.warn('Error stopping video', e);
+      }
+    }
+    stopProgressTimer();
+    isPlaying.value = false;
+    currentTime.value = 0;
+    currentSong.value = null;
+    isFullPlayerOpen.value = false;
+
+    if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+      } catch (e) {}
+    }
+  };
+
   return {
     currentSong,
     playlist,
@@ -372,6 +394,20 @@ export const useYouTubePlayer = () => {
     toggleShuffle,
     toggleLoop,
     openFullPlayer,
-    closeFullPlayer
+    closeFullPlayer,
+    closePlayer
   };
 };
+
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  (window as any).__YT_PLAYER__ = {
+    currentSong,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    isShuffle,
+    isLoop,
+    isFullPlayerOpen
+  };
+}

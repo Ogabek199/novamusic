@@ -3,6 +3,7 @@ import type { Song, HistoryItem, RetentionType } from '~/types/music';
 import { STORAGE_KEYS, CONFIG } from '~/constants/config';
 import { useToast } from './useToast';
 import { useI18n } from './useI18n';
+import { isSongValid } from './useMusicApi';
 
 const history = ref<HistoryItem[]>([]);
 const hidden = ref<string[]>([]);
@@ -106,7 +107,7 @@ export const useAntiRepeat = () => {
   };
 
   const filterSongs = (songs: Song[]): Song[] => {
-    return songs.filter((song) => !isHeard(song.id) && !isHidden(song.id));
+    return songs.filter((song) => !isHeard(song.id) && !isHidden(song.id) && isSongValid(song));
   };
 
   const markAsHeard = (song: Song, playedDuration = 30) => {

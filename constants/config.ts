@@ -52,6 +52,46 @@ export const GENRES: Genre[] = [
 
 export const FALLBACK_SONGS: Song[] = [
   {
+    id: 'sSepE8s3M2c',
+    title: 'Yulduz Usmonova & Xamdam Sobirov - Daryo Daryo',
+    channelTitle: 'Xamdam Sobirov',
+    thumbnail: 'https://i.ytimg.com/vi/sSepE8s3M2c/hqdefault.jpg',
+    duration: '4:48',
+    durationSeconds: 288
+  },
+  {
+    id: 'tdCjVMAAdxw',
+    title: 'Izzat Shukurov - Oshiqman',
+    channelTitle: 'IZZAT SHUKUROV',
+    thumbnail: 'https://i.ytimg.com/vi/tdCjVMAAdxw/hqdefault.jpg',
+    duration: '4:25',
+    durationSeconds: 265
+  },
+  {
+    id: 'OlfM51vqI50',
+    title: 'Shahlo Ahmedova - Avayla',
+    channelTitle: 'Shahlo Ahmedova',
+    thumbnail: 'https://i.ytimg.com/vi/OlfM51vqI50/hqdefault.jpg',
+    duration: '2:58',
+    durationSeconds: 178
+  },
+  {
+    id: 'anfSyaMbMzI',
+    title: 'Ismail - Ifori kelsin',
+    channelTitle: 'Ismail Akhbarov',
+    thumbnail: 'https://i.ytimg.com/vi/anfSyaMbMzI/hqdefault.jpg',
+    duration: '3:13',
+    durationSeconds: 193
+  },
+  {
+    id: 'Kf3FgYLZ3EQ',
+    title: "Xojiakbar Ruzmetov - Ko'rmasam bo'lmas",
+    channelTitle: 'Xojiakbar Ruzmetov',
+    thumbnail: 'https://i.ytimg.com/vi/Kf3FgYLZ3EQ/hqdefault.jpg',
+    duration: '4:00',
+    durationSeconds: 240
+  },
+  {
     id: 'kJQP7kiw5Fk',
     title: 'Luis Fonsi - Despacito ft. Daddy Yankee',
     channelTitle: 'Luis Fonsi',

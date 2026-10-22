@@ -4,6 +4,7 @@ import { COUNTRIES } from '~/constants/config';
 import { useAntiRepeat } from '~/composables/useAntiRepeat';
 import { useI18n } from '~/composables/useI18n';
 import { useToast } from '~/composables/useToast';
+import { usePwaInstall } from '~/composables/usePwaInstall';
 import type { RetentionType, AppLanguage, Country } from '~/types/music';
 
 const emit = defineEmits<{
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 const { retention, region, totalListened, hiddenCount, setRetention } = useAntiRepeat();
 const { currentLang, setLang, t } = useI18n();
 const { showToast } = useToast();
+const { installPwa, isInstalled } = usePwaInstall();
 
 const currentCountry = computed(() => {
   return COUNTRIES.find((c: Country) => c.code === region.value) || COUNTRIES[0];
@@ -28,10 +30,6 @@ const onLangChange = (e: Event) => {
   const target = e.target as HTMLSelectElement;
   setLang(target.value as AppLanguage);
   showToast(t('toast_lang_changed'));
-};
-
-const installPwa = () => {
-  showToast('PWA o\'rnatish tayyor!');
 };
 </script>
 
@@ -198,17 +196,7 @@ const installPwa = () => {
 
         <div class="ios-cell readonly">
           <span class="cell-title">{{ t('settings_app_version') }}</span>
-          <span class="cell-value">3.0.0 (NovaMusic PWA - Nuxt 3 & TailwindCSS)</span>
-        </div>
-
-        <div class="ios-cell readonly">
-          <span class="cell-title">{{ t('settings_player_engine') }}</span>
-          <span class="cell-value">{{ t('settings_player_engine') }} (IFrame API)</span>
-        </div>
-
-        <div class="ios-cell readonly">
-          <span class="cell-title">{{ t('settings_cache_offline') }}</span>
-          <span class="cell-value">Reactive Cache & Nuxt 3 (<span style="color: #34C759; font-weight: 600;">{{ t('settings_active') }}</span>)</span>
+          <span class="cell-value font-mono">1.0.0</span>
         </div>
       </div>
     </div>

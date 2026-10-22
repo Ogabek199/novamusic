@@ -1767,22 +1767,36 @@ html, body, #__nuxt {
   z-index: 2;
   display: flex;
   align-items: center;
-  padding-right: 8px;
+  padding-right: 6px;
+  gap: 2px;
 }
 
 .mini-action-btn {
   background: transparent;
   border: none;
   color: var(--ios-text-primary);
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.15s ease, transform 0.1s ease, color 0.15s ease;
+}
+.mini-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 .mini-action-btn:active {
   transform: scale(0.9);
+}
+
+.mini-close-btn {
+  color: var(--ios-text-secondary);
+}
+.mini-close-btn:hover {
+  color: var(--ios-text-primary);
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 /* ==========================================================================
@@ -2129,6 +2143,13 @@ html, body, #__nuxt {
   border: 1px solid rgba(52, 199, 89, 0.25);
   padding: 2px 8px;
   border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.anti-repeat-badge.is-heard {
+  background: rgba(52, 199, 89, 0.26);
+  border-color: rgba(52, 199, 89, 0.55);
+  box-shadow: 0 0 10px rgba(52, 199, 89, 0.25);
 }
 
 .sheet-quick-actions {
@@ -2143,7 +2164,7 @@ html, body, #__nuxt {
   height: 42px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: #ffffff;
@@ -2152,15 +2173,21 @@ html, body, #__nuxt {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 .sheet-round-btn:hover {
   background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.28);
   transform: scale(1.06);
 }
 .sheet-round-btn:active {
   transform: scale(0.92);
-  background: var(--ios-accent);
+}
+.sheet-round-btn.active {
+  background: rgba(52, 199, 89, 0.22);
+  border-color: rgba(52, 199, 89, 0.6);
+  color: #34c759;
+  box-shadow: 0 0 16px rgba(52, 199, 89, 0.35);
 }
 
 /* Progress Slider */
@@ -2176,11 +2203,16 @@ html, body, #__nuxt {
   appearance: none;
   width: 100%;
   height: 5px;
-  border-radius: 3px;
-  background: linear-gradient(to right, #ffffff var(--progress-percent, 0%), rgba(255, 255, 255, 0.22) var(--progress-percent, 0%));
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    #ffffff var(--progress-percent, 0%),
+    rgba(255, 255, 255, 0.24) var(--progress-percent, 0%)
+  );
   outline: none;
   cursor: pointer;
   transition: height 0.15s ease;
+  position: relative;
 }
 
 .ios-slider:hover {
@@ -2190,17 +2222,33 @@ html, body, #__nuxt {
 .ios-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.15s ease;
+}
+
+.ios-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.55);
 }
 
 .ios-slider:active::-webkit-slider-thumb {
   transform: scale(1.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+}
+
+.ios-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
 }
 
 .sheet-time-labels {
@@ -2211,6 +2259,7 @@ html, body, #__nuxt {
   color: rgba(255, 255, 255, 0.55);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.1px;
 }
 
 /* Boshqaruv Tugmalari */
@@ -2218,55 +2267,74 @@ html, body, #__nuxt {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
-  margin-bottom: 14px;
+  padding: 6px 6px;
+  margin-bottom: 16px;
 }
 
 .control-secondary-btn {
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.5);
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 .control-secondary-btn:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.06);
+}
+.control-secondary-btn:active {
+  transform: scale(0.92);
 }
 .control-secondary-btn.active {
-  color: var(--ios-accent);
-  background: rgba(250, 45, 72, 0.18);
+  color: #fa2d48;
+  background: rgba(250, 45, 72, 0.16);
+  box-shadow: 0 0 18px rgba(250, 45, 72, 0.28);
+}
+.control-secondary-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fa2d48;
+  box-shadow: 0 0 6px #fa2d48;
 }
 
 .control-nav-btn {
   background: transparent;
   border: none;
   color: #ffffff;
-  width: 54px;
-  height: 54px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   border-radius: 50%;
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1), background 0.15s ease;
 }
 .control-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
 }
 .control-nav-btn:active {
   transform: scale(0.88);
 }
 
 .control-play-btn {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   background: #ffffff;
   color: #000000;
@@ -2275,15 +2343,15 @@ html, body, #__nuxt {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.22);
-  transition: transform 0.15s var(--ios-spring-easing), box-shadow 0.2s ease;
+  box-shadow: 0 10px 32px rgba(255, 255, 255, 0.25), 0 4px 16px rgba(0, 0, 0, 0.45);
+  transition: transform 0.18s var(--ios-spring-easing), box-shadow 0.2s ease;
 }
 .control-play-btn:hover {
-  box-shadow: 0 10px 28px rgba(255, 255, 255, 0.35);
-  transform: scale(1.03);
+  box-shadow: 0 14px 40px rgba(255, 255, 255, 0.38), 0 6px 20px rgba(0, 0, 0, 0.5);
+  transform: scale(1.04);
 }
 .control-play-btn:active {
-  transform: scale(0.93);
+  transform: scale(0.92);
 }
 
 /* Ovoz bo'limi */
@@ -2291,13 +2359,39 @@ html, body, #__nuxt {
   display: flex;
   align-items: center;
   gap: 14px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.55);
   padding: 0 4px;
   margin-bottom: 8px;
 }
 
-#fullVolumeSlider {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.85) var(--vol-percent, 80%), rgba(255, 255, 255, 0.2) var(--vol-percent, 80%));
+.volume-icon-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.volume-icon-btn:hover {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+.volume-icon-btn:active {
+  transform: scale(0.9);
+}
+
+.ios-volume-slider {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.95) var(--vol-percent, 80%),
+    rgba(255, 255, 255, 0.22) var(--vol-percent, 80%)
+  );
 }
 
 /* Yashirin YouTube Player Slot - Off-screen emas, viewportda lekin ko'rinmas va tegilmas */

@@ -120,6 +120,7 @@ const onHideSong = () => {
         <div class="sheet-quick-actions">
           <button
             class="sheet-round-btn"
+            :class="{ active: isHeard(currentSong.id) }"
             id="fullMarkListenedBtn"
             :title="t('action_heard')"
             @click="onMarkListened"
@@ -154,7 +155,11 @@ const onHideSong = () => {
           id="fullTimelineSlider"
           min="0"
           max="100"
+          step="0.1"
           :value="duration > 0 ? (currentTime / duration) * 100 : 0"
+          :style="{
+            '--progress-percent': `${duration > 0 ? (currentTime / duration) * 100 : 0}%`
+          }"
           class="ios-slider"
           @input="onSliderChange"
         />
@@ -173,11 +178,12 @@ const onHideSong = () => {
           :title="t('shuffle_btn')"
           @click="toggleShuffle"
         >
-          <svg class="sf-icon" viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M10.6 13.4l-1.4 1.4-4-4c-.8-.8-.8-2 0-2.8l4-4 1.4 1.4L7.8 8.2c.4.1.8.3 1.1.6l1.7 1.7zm2.8-2.8l1.4-1.4 4 4c.8.8.8 2 0 2.8l-4 4-1.4-1.4 2.8-2.8c-.4-.1-.8-.3-1.1-.6l-1.7-1.7zm1.4 5.6l4 4-1.4 1.4-4-4 1.4-1.4zm-5.6-5.6L5.2 6.6 6.6 5.2l4 4-1.4 1.4z"
-            />
+          <svg class="sf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8" />
+            <line x1="4" y1="20" x2="21" y2="3" />
+            <polyline points="21 16 21 21 16 21" />
+            <line x1="15" y1="15" x2="21" y2="21" />
+            <line x1="4" y1="4" x2="9" y2="9" />
           </svg>
         </button>
 
@@ -187,8 +193,8 @@ const onHideSong = () => {
           title="Oldingi musiqa"
           @click="prev"
         >
-          <svg class="sf-icon-lg" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+          <svg class="sf-icon-lg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1zm3.2 7.78l9.53 6.35A1 1 0 0 0 20.27 18.3V5.7a1 1 0 0 0-1.54-.83L9.2 11.22a1 1 0 0 0 0 1.56z" />
           </svg>
         </button>
 
@@ -199,10 +205,14 @@ const onHideSong = () => {
           @click="togglePlay"
         >
           <svg v-if="isPlaying" class="sf-icon-hero" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            <rect x="5.5" y="4.5" width="4.5" height="15" rx="2.25" fill="currentColor" />
+            <rect x="14" y="4.5" width="4.5" height="15" rx="2.25" fill="currentColor" />
           </svg>
           <svg v-else class="sf-icon-hero" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M8 5v14l11-7z" />
+            <path
+              fill="currentColor"
+              d="M8.5 5.5v13a1 1 0 0 0 1.54.84l10.4-6.5a1 1 0 0 0 0-1.68l-10.4-6.5A1 1 0 0 0 8.5 5.5z"
+            />
           </svg>
         </button>
 
@@ -212,8 +222,8 @@ const onHideSong = () => {
           title="Keyingi musiqa"
           @click="next"
         >
-          <svg class="sf-icon-lg" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+          <svg class="sf-icon-lg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1zM4.73 5.7v12.6a1 1 0 0 0 1.54.83l9.53-6.35a1 1 0 0 0 0-1.56L6.27 4.87a1 1 0 0 0-1.54.83z" />
           </svg>
         </button>
 
@@ -224,35 +234,49 @@ const onHideSong = () => {
           title="Takrorlash"
           @click="toggleLoop"
         >
-          <svg class="sf-icon" viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"
-            />
+          <svg class="sf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9" />
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+            <polyline points="7 23 3 19 7 15" />
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
           </svg>
         </button>
       </div>
 
       <!-- Ovoz Sladeri -->
       <div class="sheet-volume-section">
-        <svg class="sf-icon-sm" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M7 9v6h4l5 5V4l-5 5H7z" />
-        </svg>
+        <button
+          type="button"
+          class="volume-icon-btn"
+          title="Ovozni o'chirish"
+          @click="setVolume(0)"
+        >
+          <svg class="sf-icon-sm" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11 5L6 9H3v6h3l5 4V5z" />
+          </svg>
+        </button>
         <input
           type="range"
           id="fullVolumeSlider"
           min="0"
           max="100"
           :value="volume"
-          class="ios-slider"
+          :style="{ '--vol-percent': `${volume}%` }"
+          class="ios-slider ios-volume-slider"
           @input="onVolumeChange"
         />
-        <svg class="sf-icon-sm" viewBox="0 0 24 24">
-          <path
-            fill="currentColor"
-            d="M3 9v6h4l5 5V4l-5 5H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
-          />
-        </svg>
+        <button
+          type="button"
+          class="volume-icon-btn"
+          title="Maksimal ovoz"
+          @click="setVolume(100)"
+        >
+          <svg class="sf-icon-sm" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3 9v6h4l5 5V4l-5 5H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   </div>

@@ -1,16 +1,12 @@
-const CACHE_NAME = 'musiqa-ios-pwa-v3';
+const CACHE_NAME = 'novamusic-pwa-v1';
 const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './style.css',
-  './script.js',
-  './config.js',
-  './manifest.json',
-  './icons/apple-touch-icon-180.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-  './icons/favicon-32.png'
+  '/',
+  '/manifest.json',
+  '/icons/apple-touch-icon-180.png',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/icon-maskable-512.png',
+  '/icons/favicon-32.png'
 ];
 
 // O'rnatish bosqichi - App Shell'ni keshga yuklash
