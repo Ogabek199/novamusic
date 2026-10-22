@@ -1,4 +1,4 @@
-const CACHE_NAME = 'novamusic-pwa-v1';
+const CACHE_NAME = 'novamusic-pwa-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -11,10 +11,11 @@ const STATIC_ASSETS = [
 
 // O'rnatish bosqichi - App Shell'ni keshga yuklash
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
@@ -33,11 +34,38 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// SKIP_WAITING xabari kelganda darhol faollashish
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // So'rovlarni tutib olish (Fetch)
 self.addEventListener('fetch', (event) => {
+  // Faqat GET so'rovlarni keshlaymiz
+  if (event.request.method !== 'GET') return;
+
   const requestUrl = new URL(event.request.url);
 
-  // 1. YouTube Data API so'rovlari: Network-First (oflaynda keshdan olish)
+  // 1. Sahifaga kirish (HTML / Navigatsiya): Network-First
+  // Yangi update chiqqanda har doim serverdan eng yangi HTML olinadi!
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('/')))
+    );
+    return;
+  }
+
+  // 2. YouTube Data API so'rovlari: Network-First (oflaynda keshdan olish)
   if (requestUrl.hostname.includes('googleapis.com')) {
     event.respondWith(
       fetch(event.request)
@@ -57,7 +85,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. YouTube IFrame API va tashqi media resurslar
+  // 3. YouTube IFrame API va tashqi media resurslar
   if (requestUrl.hostname.includes('youtube.com') || requestUrl.hostname.includes('ytimg.com')) {
     event.respondWith(
       fetch(event.request).catch(() => caches.match(event.request))
@@ -65,21 +93,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Mahalliy App Shell resurslari: Cache-First
+  // 4. Mahalliy statik aktivlar (JS, CSS, rasmlar): Stale-While-Revalidate
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fon yangilanishini tekshirish (Stale-While-Revalidate)
-        fetch(event.request).then((networkResponse) => {
+      const fetchPromise = fetch(event.request)
+        .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse);
-            });
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-      return fetch(event.request);
+          return networkResponse;
+        })
+        .catch(() => cachedResponse);
+
+      return cachedResponse || fetchPromise;
     })
   );
 });

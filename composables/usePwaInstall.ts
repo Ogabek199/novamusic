@@ -24,13 +24,46 @@ export function usePwaInstall() {
     };
     checkInstalled();
 
-    // 2. Register Service Worker
+    // 2. Register Service Worker & auto-check updates
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
+        .then((reg) => {
+          reg.update();
+
+          // Foydalanuvchi ilovaga qaytganda yangilanishni tekshirish
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+              reg.update();
+            }
+          });
+
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                }
+              });
+            }
+          });
+        })
         .catch((err) => {
           console.warn('[PWA] Service Worker registration failed:', err);
         });
+
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
     }
 
     // 3. Listen for beforeinstallprompt event (Android, Chrome, Edge)
