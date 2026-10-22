@@ -47,7 +47,18 @@ export function usePwaInstall() {
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  // Yangi update o'rnatildi - foydalanuvchiga toast ko'rsatish
+                  const updateMsg =
+                    currentLang.value === 'ru'
+                      ? 'Доступно новое обновление! Нажмите для обновления ✨'
+                      : currentLang.value === 'en'
+                        ? 'New update available! Tap to reload ✨'
+                        : 'Yangi versiya chiqdi! Yangilash uchun bosing ✨';
+
+                  showToast(updateMsg, 8000, () => {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  });
                 }
               });
             }

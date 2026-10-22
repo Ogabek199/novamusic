@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import type { Song } from '~/types/music';
-import { CONFIG, STORAGE_KEYS } from '~/constants/config';
+import { CONFIG, STORAGE_KEYS, FALLBACK_SONGS } from '~/constants/config';
 import { useAntiRepeat } from './useAntiRepeat';
 import { useToast } from './useToast';
 import { useI18n } from './useI18n';
@@ -73,6 +73,24 @@ export const useYouTubePlayer = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
+  const updatePositionState = () => {
+    if (
+      typeof navigator !== 'undefined' &&
+      'mediaSession' in navigator &&
+      'setPositionState' in navigator.mediaSession &&
+      duration.value > 0
+    ) {
+      try {
+        const pos = Math.min(Math.max(0, currentTime.value), duration.value);
+        navigator.mediaSession.setPositionState({
+          duration: duration.value,
+          playbackRate: 1.0,
+          position: pos
+        });
+      } catch (e) {}
+    }
+  };
+
   const updateMediaSession = (song: Song) => {
     if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -81,11 +99,13 @@ export const useYouTubePlayer = () => {
         album: 'NovaMusic - Takrorlanmas',
         artwork: [
           { src: song.thumbnail, sizes: '512x512', type: 'image/jpeg' },
+          { src: song.thumbnail, sizes: '256x256', type: 'image/jpeg' },
           { src: song.thumbnail, sizes: '128x128', type: 'image/jpeg' }
         ]
       });
 
       navigator.mediaSession.playbackState = isPlaying.value ? 'playing' : 'paused';
+      updatePositionState();
 
       navigator.mediaSession.setActionHandler('play', () => {
         userInitiatedPause = false;
@@ -96,8 +116,10 @@ export const useYouTubePlayer = () => {
           } catch (e) {}
         }
         isPlaying.value = true;
+        navigator.mediaSession.playbackState = 'playing';
         startProgressTimer();
       });
+
       navigator.mediaSession.setActionHandler('pause', () => {
         userInitiatedPause = true;
         pauseSilentAudio();
@@ -107,10 +129,41 @@ export const useYouTubePlayer = () => {
           } catch (e) {}
         }
         isPlaying.value = false;
+        navigator.mediaSession.playbackState = 'paused';
         stopProgressTimer();
       });
-      navigator.mediaSession.setActionHandler('previoustrack', () => prev());
-      navigator.mediaSession.setActionHandler('nexttrack', () => next());
+
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        userInitiatedPause = false;
+        prev();
+      });
+
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        userInitiatedPause = false;
+        next();
+      });
+
+      // Oldinga/orqaga surish (Lock screen seek & scrub)
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime !== undefined && details.seekTime !== null) {
+          seekTo(details.seekTime);
+          updatePositionState();
+        }
+      });
+
+      navigator.mediaSession.setActionHandler('seekforward', (details) => {
+        const skipTime = details.seekOffset || 10;
+        const target = Math.min(duration.value || 300, currentTime.value + skipTime);
+        seekTo(target);
+        updatePositionState();
+      });
+
+      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+        const skipTime = details.seekOffset || 10;
+        const target = Math.max(0, currentTime.value - skipTime);
+        seekTo(target);
+        updatePositionState();
+      });
     }
   };
 
@@ -123,6 +176,7 @@ export const useYouTubePlayer = () => {
           const dur = ytPlayer.getDuration() || 0;
           currentTime.value = curr;
           if (dur > 0) duration.value = dur;
+          updatePositionState();
 
           playedSeconds++;
 
@@ -299,7 +353,11 @@ export const useYouTubePlayer = () => {
     try {
       ensureSilentAudio();
       ytPlayer.loadVideoById(song.id);
+      try {
+        ytPlayer.playVideo();
+      } catch (err) {}
       isPlaying.value = true;
+      userInitiatedPause = false;
       updateMediaSession(song);
       startProgressTimer();
     } catch (e) {
@@ -327,12 +385,18 @@ export const useYouTubePlayer = () => {
         isPlaying.value = false;
         pauseSilentAudio();
         stopProgressTimer();
+        if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
       } else {
         userInitiatedPause = false;
         ensureSilentAudio();
         ytPlayer.playVideo();
         isPlaying.value = true;
         startProgressTimer();
+        if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+        }
       }
     } catch (e) {
       console.warn('Toggle play failed', e);
@@ -340,7 +404,21 @@ export const useYouTubePlayer = () => {
   };
 
   const next = () => {
-    if (playlist.value.length === 0) return;
+    userInitiatedPause = false;
+    if (playlist.value.length === 0) {
+      if (currentSong.value) {
+        seekTo(0);
+        try {
+          ytPlayer?.playVideo();
+        } catch (e) {}
+      }
+      return;
+    }
+
+    if (playlist.value.length === 1) {
+      const fallbackList = FALLBACK_SONGS.filter((s) => s.id !== playlist.value[0].id);
+      playlist.value = [...playlist.value, ...fallbackList];
+    }
 
     if (isShuffle.value) {
       // Find songs in playlist that haven't been heard or hidden
@@ -365,11 +443,15 @@ export const useYouTubePlayer = () => {
   };
 
   const prev = () => {
+    userInitiatedPause = false;
     if (playlist.value.length === 0) return;
 
     // If more than 3 seconds in, restart track
     if (currentTime.value > 3 && ytPlayer && isPlayerReady) {
       seekTo(0);
+      try {
+        ytPlayer.playVideo();
+      } catch (e) {}
       return;
     }
 
@@ -385,6 +467,7 @@ export const useYouTubePlayer = () => {
     if (ytPlayer && isPlayerReady) {
       try {
         ytPlayer.seekTo(seconds, true);
+        updatePositionState();
       } catch (e) {}
     }
   };

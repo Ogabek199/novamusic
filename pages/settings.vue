@@ -17,6 +17,9 @@ const { currentLang, setLang, t } = useI18n();
 const { showToast } = useToast();
 const { installPwa, isInstalled } = usePwaInstall();
 
+const config = useRuntimeConfig();
+const appVersion = (config.public.appVersion as string) || '1.1.0';
+
 const currentCountry = computed(() => {
   return COUNTRIES.find((c: Country) => c.code === region.value) || COUNTRIES[0];
 });
@@ -196,7 +199,7 @@ const onLangChange = (e: Event) => {
 
         <div class="ios-cell readonly">
           <span class="cell-title">{{ t('settings_app_version') }}</span>
-          <span class="cell-value font-mono">1.0.0</span>
+          <span class="cell-value font-mono">v{{ appVersion }}</span>
         </div>
       </div>
     </div>

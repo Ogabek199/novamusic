@@ -1,3 +1,14 @@
+import { execSync } from 'child_process';
+import pkg from './package.json';
+
+let commitHash = '';
+try {
+  commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+} catch (e) {
+  commitHash = Date.now().toString().slice(-4);
+}
+const appVersion = `${pkg.version}.${commitHash}`;
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -14,6 +25,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       appName: process.env.NUXT_PUBLIC_APP_NAME || 'NovaMusic',
+      appVersion,
       youtubeApiKey: process.env.NUXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyBOr_0rN-RMsO9EtJ8sf4rVKBJp27n5_IA'
     }
   },

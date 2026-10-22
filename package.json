@@ -1,6 +1,6 @@
 {
   "name": "youtube-music-clone",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "YouTube Music Web App with Unique Anti-Repeat Algorithm",
   "private": true,
   "type": "module",
