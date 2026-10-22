@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from '~/composables/useI18n';
 import { useToast } from '~/composables/useToast';
@@ -12,12 +13,40 @@ const router = useRouter();
 const { currentLang, setLang, t } = useI18n();
 const { showToast } = useToast();
 
-const onLangChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  const newLang = target.value as AppLanguage;
-  setLang(newLang);
-  showToast(t('toast_lang_changed'));
+const isLangDropdownOpen = ref(false);
+const langDropdownRef = ref<HTMLElement | null>(null);
+
+const LANGUAGES: Array<{ code: AppLanguage; flag: string; label: string; short: string }> = [
+  { code: 'uz', flag: '🇺🇿', label: "O'zbekcha", short: 'UZ' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский', short: 'RU' },
+  { code: 'en', flag: '🇬🇧', label: 'English', short: 'EN' }
+];
+
+const currentLangMeta = computed(() => {
+  return LANGUAGES.find((l) => l.code === currentLang.value) || LANGUAGES[0];
+});
+
+const selectLang = (code: AppLanguage) => {
+  if (currentLang.value !== code) {
+    setLang(code);
+    showToast(t('toast_lang_changed'));
+  }
+  isLangDropdownOpen.value = false;
 };
+
+const onDocumentClick = (e: MouseEvent) => {
+  if (langDropdownRef.value && !langDropdownRef.value.contains(e.target as Node)) {
+    isLangDropdownOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', onDocumentClick);
+});
 
 const onBrandClick = () => {
   router.push('/');
@@ -80,21 +109,60 @@ const onRefreshClick = () => {
 
       <!-- O'ng: Interaktiv Tugmalar -->
       <div class="header-actions-group">
-        <!-- Til tanlash Select Dropdown -->
-        <div class="header-lang-select-wrapper" title="Tilni tanlang">
-          <select
-            :value="currentLang"
-            class="header-lang-select"
-            aria-label="Tilni tanlang"
-            @change="onLangChange"
+        <!-- Maxsus iOS Til Tanlash UI Dropdown -->
+        <div class="header-custom-select-wrapper" ref="langDropdownRef">
+          <button
+            type="button"
+            class="header-lang-btn"
+            :class="{ active: isLangDropdownOpen }"
+            aria-label="Tilni tanlash"
+            aria-haspopup="listbox"
+            :aria-expanded="isLangDropdownOpen"
+            @click.stop="isLangDropdownOpen = !isLangDropdownOpen"
           >
-            <option value="uz">🇺🇿 UZ</option>
-            <option value="ru">🇷🇺 RU</option>
-            <option value="en">🇬🇧 EN</option>
-          </select>
-          <svg class="sf-icon-xxs lang-select-arrow" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M7 10l5 5 5-5z" />
-          </svg>
+            <span class="header-lang-flag">{{ currentLangMeta.flag }}</span>
+            <span class="header-lang-code">{{ currentLangMeta.short }}</span>
+            <svg
+              class="sf-icon-xxs lang-chevron"
+              :class="{ rotated: isLangDropdownOpen }"
+              viewBox="0 0 24 24"
+            >
+              <path fill="currentColor" d="M7 10l5 5 5-5z" />
+            </svg>
+          </button>
+
+          <!-- Custom iOS Popover Dropdown -->
+          <Transition name="ios-popover">
+            <div v-if="isLangDropdownOpen" class="header-lang-popover" role="listbox">
+              <div class="popover-options">
+                <button
+                  v-for="item in LANGUAGES"
+                  :key="item.code"
+                  type="button"
+                  class="popover-option-item"
+                  :class="{ selected: currentLang === item.code }"
+                  role="option"
+                  :aria-selected="currentLang === item.code"
+                  @click="selectLang(item.code)"
+                >
+                  <div class="option-left">
+                    <span class="option-flag">{{ item.flag }}</span>
+                    <span class="option-label">{{ item.label }}</span>
+                  </div>
+                  <svg
+                    v-if="currentLang === item.code"
+                    class="sf-icon-xs check-icon"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </Transition>
         </div>
 
         <!-- Yangilash / Aralashtirish tugmasi -->

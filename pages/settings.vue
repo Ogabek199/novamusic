@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { COUNTRIES } from '~/constants/config';
 import { useAntiRepeat } from '~/composables/useAntiRepeat';
 import { useI18n } from '~/composables/useI18n';
@@ -17,6 +17,21 @@ const { currentLang, setLang, t } = useI18n();
 const { showToast } = useToast();
 const { installPwa, isInstalled } = usePwaInstall();
 
+const isRetentionModalOpen = ref(false);
+const isLangModalOpen = ref(false);
+
+const RETENTION_OPTIONS: Array<{ value: RetentionType; labelKey: string; icon: string }> = [
+  { value: 'never', labelKey: 'settings_retention_never', icon: '⏱' },
+  { value: '7d', labelKey: 'settings_retention_7d', icon: '📅' },
+  { value: '30d', labelKey: 'settings_retention_30d', icon: '🗓' }
+];
+
+const LANG_OPTIONS: Array<{ value: AppLanguage; title: string; flag: string }> = [
+  { value: 'uz', title: "O'zbekcha", flag: '🇺🇿' },
+  { value: 'ru', title: 'Русский', flag: '🇷🇺' },
+  { value: 'en', title: 'English', flag: '🇬🇧' }
+];
+
 const config = useRuntimeConfig();
 const appVersion = (config.public.appVersion as string) || '1.1.0';
 
@@ -24,14 +39,24 @@ const currentCountry = computed(() => {
   return COUNTRIES.find((c: Country) => c.code === region.value) || COUNTRIES[0];
 });
 
-const onRetentionChange = (e: Event) => {
-  const target = e.target as HTMLSelectElement;
-  setRetention(target.value as RetentionType);
+const currentRetentionLabel = computed(() => {
+  const found = RETENTION_OPTIONS.find((o) => o.value === retention.value);
+  return found ? t(found.labelKey) : t('settings_retention_never');
+});
+
+const currentLangLabel = computed(() => {
+  const found = LANG_OPTIONS.find((o) => o.value === currentLang.value);
+  return found ? `${found.flag} ${found.title}` : "🇺🇿 O'zbekcha";
+});
+
+const selectRetention = (val: RetentionType) => {
+  setRetention(val);
+  isRetentionModalOpen.value = false;
 };
 
-const onLangChange = (e: Event) => {
-  const target = e.target as HTMLSelectElement;
-  setLang(target.value as AppLanguage);
+const selectLanguage = (val: AppLanguage) => {
+  setLang(val);
+  isLangModalOpen.value = false;
   showToast(t('toast_lang_changed'));
 };
 </script>
@@ -48,7 +73,13 @@ const onLangChange = (e: Event) => {
       <!-- 1. Algoritm Sozlamalari -->
       <div class="group-header">{{ t('settings_group_algorithm') }}</div>
       <div class="group-cells">
-        <div class="ios-cell">
+        <!-- Qayta Chiqish Muddati (Retention) -->
+        <div
+          class="ios-cell interactive-cell"
+          role="button"
+          tabindex="0"
+          @click="isRetentionModalOpen = true"
+        >
           <div class="cell-main-left">
             <div class="cell-icon-badge purple-badge">
               <svg class="sf-icon-xs" viewBox="0 0 24 24">
@@ -63,19 +94,16 @@ const onLangChange = (e: Event) => {
               <span class="cell-subtitle">{{ t('settings_retention_sub') }}</span>
             </div>
           </div>
-          <select
-            :value="retention"
-            class="ios-select"
-            id="retentionSelect"
-            @change="onRetentionChange"
-          >
-            <option value="never">{{ t('settings_retention_never') }}</option>
-            <option value="7d">{{ t('settings_retention_7d') }}</option>
-            <option value="30d">{{ t('settings_retention_30d') }}</option>
-          </select>
+          <div class="cell-value-action">
+            <span class="selected-value-preview">{{ currentRetentionLabel }}</span>
+            <svg class="sf-icon-xxs arrow-right" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+            </svg>
+          </div>
         </div>
 
-        <div class="ios-cell" role="button" tabindex="0" @click="emit('open-country-sheet')">
+        <!-- Mintaqa va Davlat (Country) -->
+        <div class="ios-cell interactive-cell" role="button" tabindex="0" @click="emit('open-country-sheet')">
           <div class="cell-main-left">
             <div class="cell-icon-badge blue-badge">
               <svg class="sf-icon-xs" viewBox="0 0 24 24">
@@ -100,7 +128,13 @@ const onLangChange = (e: Event) => {
           </div>
         </div>
 
-        <div class="ios-cell">
+        <!-- Ilova Tili (Language) -->
+        <div
+          class="ios-cell interactive-cell"
+          role="button"
+          tabindex="0"
+          @click="isLangModalOpen = true"
+        >
           <div class="cell-main-left">
             <div class="cell-icon-badge orange-badge">
               <svg class="sf-icon-xs" viewBox="0 0 24 24">
@@ -115,16 +149,12 @@ const onLangChange = (e: Event) => {
               <span class="cell-subtitle">{{ t('settings_lang_sub') }}</span>
             </div>
           </div>
-          <select
-            :value="currentLang"
-            class="ios-select"
-            id="settingsLangSelect"
-            @change="onLangChange"
-          >
-            <option value="uz">🇺🇿 O'zbekcha</option>
-            <option value="ru">🇷🇺 Русский</option>
-            <option value="en">🇬🇧 English</option>
-          </select>
+          <div class="cell-value-action">
+            <span class="selected-value-preview">{{ currentLangLabel }}</span>
+            <svg class="sf-icon-xxs arrow-right" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+            </svg>
+          </div>
         </div>
       </div>
       <div class="group-footer-hint">
@@ -205,5 +235,99 @@ const onLangChange = (e: Event) => {
     </div>
 
     <div class="bottom-safe-spacer"></div>
+
+    <!-- Retention Picker Action Sheet Modal -->
+    <div
+      class="ios-action-sheet-overlay"
+      :class="{ hidden: !isRetentionModalOpen }"
+      @click.self="isRetentionModalOpen = false"
+    >
+      <div class="ios-action-sheet" id="retentionSheet">
+        <div class="action-sheet-header">
+          <div class="action-sheet-handle"></div>
+          <h3>{{ t('settings_retention_label') }}</h3>
+          <p>{{ t('settings_retention_sub') }}</p>
+        </div>
+        <div class="country-list-scroll">
+          <button
+            v-for="opt in RETENTION_OPTIONS"
+            :key="opt.value"
+            type="button"
+            class="country-item-cell"
+            :class="{ active: retention === opt.value }"
+            @click="selectRetention(opt.value)"
+          >
+            <div class="country-flag-title">
+              <span class="flag-icon">{{ opt.icon }}</span>
+              <span class="name-text">{{ t(opt.labelKey) }}</span>
+            </div>
+            <svg
+              v-if="retention === opt.value"
+              class="sf-icon-sm checkmark"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+              />
+            </svg>
+          </button>
+        </div>
+        <button
+          type="button"
+          class="action-sheet-cancel-btn"
+          @click="isRetentionModalOpen = false"
+        >
+          {{ t('confirm_cancel') }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Language Picker Action Sheet Modal -->
+    <div
+      class="ios-action-sheet-overlay"
+      :class="{ hidden: !isLangModalOpen }"
+      @click.self="isLangModalOpen = false"
+    >
+      <div class="ios-action-sheet" id="langSheet">
+        <div class="action-sheet-header">
+          <div class="action-sheet-handle"></div>
+          <h3>{{ t('settings_lang_label') }}</h3>
+          <p>{{ t('settings_lang_sub') }}</p>
+        </div>
+        <div class="country-list-scroll">
+          <button
+            v-for="opt in LANG_OPTIONS"
+            :key="opt.value"
+            type="button"
+            class="country-item-cell"
+            :class="{ active: currentLang === opt.value }"
+            @click="selectLanguage(opt.value)"
+          >
+            <div class="country-flag-title">
+              <span class="flag-icon">{{ opt.flag }}</span>
+              <span class="name-text">{{ opt.title }}</span>
+            </div>
+            <svg
+              v-if="currentLang === opt.value"
+              class="sf-icon-sm checkmark"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+              />
+            </svg>
+          </button>
+        </div>
+        <button
+          type="button"
+          class="action-sheet-cancel-btn"
+          @click="isLangModalOpen = false"
+        >
+          {{ t('confirm_cancel') }}
+        </button>
+      </div>
+    </div>
   </div>
 </template>

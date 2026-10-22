@@ -31,6 +31,24 @@ const onClose = () => {
   closeFullPlayer();
 };
 
+const onKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && isFullPlayerOpen.value) {
+    closeFullPlayer();
+  }
+};
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('keydown', onKeyDown);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('keydown', onKeyDown);
+  }
+});
+
 // Gesture handling: telefonda yondan tortsa yoki pastga sursa yopish
 const touchStartX = ref(0);
 const touchStartY = ref(0);
@@ -151,17 +169,50 @@ const onHideSong = () => {
       "
     ></div>
 
-    <!-- Pastga surish tutqichi (Drag handle) -->
-    <div
-      class="sheet-drag-handle-wrapper"
-      id="sheetDragHandle"
-      role="button"
-      tabindex="0"
-      title="Yopish"
-      @click="onClose"
-    >
-      <div class="sheet-drag-handle"></div>
-    </div>
+    <!-- Yuqori navigatsiya va yopish paneli (Header Bar) -->
+    <header class="sheet-header-bar">
+      <!-- Chapdagi pastga tushirish (Chevron Down) tugmasi - Spotify & Apple Music uslubida -->
+      <button
+        type="button"
+        class="sheet-header-btn sheet-minimize-btn"
+        id="fullPlayerMinimizeBtn"
+        :title="t('minimize_player')"
+        :aria-label="t('minimize_player')"
+        @click="onClose"
+      >
+        <svg class="sf-icon-header" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <!-- Markazdagi Drag handle (bosganda yoki tortganda yopiladi) -->
+      <div
+        class="sheet-drag-handle-wrapper"
+        id="sheetDragHandle"
+        role="button"
+        tabindex="0"
+        :title="t('minimize_player')"
+        :aria-label="t('minimize_player')"
+        @click="onClose"
+      >
+        <div class="sheet-drag-handle"></div>
+      </div>
+
+      <!-- O'ngdagi aniq Yopish (X) tugmasi - Veb va desktop foydalanuvchilari uchun -->
+      <button
+        type="button"
+        class="sheet-header-btn sheet-close-btn"
+        id="fullPlayerCloseBtn"
+        :title="t('close_player')"
+        :aria-label="t('close_player')"
+        @click="onClose"
+      >
+        <svg class="sf-icon-header" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </header>
 
     <div v-if="currentSong" class="sheet-inner-container">
       <!-- Katta kvadrat muqova -->

@@ -66,6 +66,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     no_song_selected: 'Musiqa tanlanmagan',
     player_subtitle_default: 'Apple Music PWA',
     artist_placeholder: 'Ijrochi',
+    minimize_player: 'Pleyerni kichraytirish',
+    close_player: 'Yopish',
     action_heard: 'Eshitildi',
     action_hide: "Ko'rsatma",
 
@@ -172,6 +174,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     no_song_selected: 'Трек не выбран',
     player_subtitle_default: 'Apple Music PWA',
     artist_placeholder: 'Исполнитель',
+    minimize_player: 'Свернуть плеер',
+    close_player: 'Закрыть',
     action_heard: 'Прослушано',
     action_hide: 'Скрыть',
 
@@ -278,6 +282,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     no_song_selected: 'No song selected',
     player_subtitle_default: 'Apple Music PWA',
     artist_placeholder: 'Artist',
+    minimize_player: 'Minimize player',
+    close_player: 'Close',
     action_heard: 'Listened',
     action_hide: 'Hide',
 
