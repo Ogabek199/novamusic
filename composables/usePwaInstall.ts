@@ -27,14 +27,18 @@ export function usePwaInstall() {
     // 2. Register Service Worker & auto-check updates
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
-        .register('/sw.js')
+        .register('/sw.js', { updateViaCache: 'none' })
         .then((reg) => {
-          reg.update();
+          // Darhol va har 45 soniyada yangilanishni tekshirish
+          reg.update().catch(() => {});
+          setInterval(() => {
+            reg.update().catch(() => {});
+          }, 45 * 1000);
 
           // Foydalanuvchi ilovaga qaytganda yangilanishni tekshirish
           document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
-              reg.update();
+              reg.update().catch(() => {});
             }
           });
 
@@ -47,18 +51,17 @@ export function usePwaInstall() {
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // Yangi update o'rnatildi - foydalanuvchiga toast ko'rsatish
+                  // Yangi versiya yuklandi: avtomatik faollashtirish
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+
                   const updateMsg =
                     currentLang.value === 'ru'
-                      ? 'Доступно новое обновление! Нажмите для обновления ✨'
+                      ? 'Обновление загружено! Применяем... ✨'
                       : currentLang.value === 'en'
-                        ? 'New update available! Tap to reload ✨'
-                        : 'Yangi versiya chiqdi! Yangilash uchun bosing ✨';
+                        ? 'Update ready! Applying... ✨'
+                        : "Yangi yangilanish o'rnatildi! Qo'llanilmoqda... ✨";
 
-                  showToast(updateMsg, 8000, () => {
-                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    window.location.reload();
-                  });
+                  showToast(updateMsg, 3500);
                 }
               });
             }

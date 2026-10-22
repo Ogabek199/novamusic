@@ -9,7 +9,6 @@ try {
 }
 const appVersion = `${pkg.version}.${commitHash}`;
 
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: false },
@@ -43,7 +42,7 @@ export default defineNuxtConfig({
           name: 'viewport',
           content: 'width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no'
         },
-        { name: 'theme-color', content: '#FA2D48' },
+        { name: 'theme-color', content: '#000000' },
         {
           name: 'description',
           content: 'NovaMusic - YouTube musiqalarini takrorlanmasdan tinglang. Apple Music uslubidagi zamonaviy PWA.'
