@@ -165,20 +165,23 @@ defineExpose({
       @open-country-sheet="emit('open-country-sheet')"
     />
 
-    <!-- Header bar: Songs count & Shuffle button -->
-    <div class="songs-section-header">
-      <div class="songs-count-badge">
-        <span class="pulse-indicator"></span>
-        <span v-if="isLoading">{{ t('songs_filtering') }}</span>
-        <span v-else>{{ t('songs_count', { count: displayedSongs.length }) }}</span>
+    <!-- Takrorlanmaslik Status Bar -->
+    <div class="ios-status-bar">
+      <div class="status-left">
+        <span class="status-dot"></span>
+        <span class="status-text" id="statusTrackCount">
+          <span v-if="isLoading">{{ t('songs_filtering') }}</span>
+          <span v-else>{{ t('songs_count', { count: displayedSongs.length }) }}</span>
+        </span>
       </div>
 
       <button
         v-if="displayedSongs.length > 0"
-        class="ios-shuffle-pill-btn"
+        class="ios-text-btn"
+        id="shuffleSongsBtn"
         @click="shuffleAndPlay"
       >
-        <svg class="sf-icon-xs" viewBox="0 0 24 24">
+        <svg class="sf-icon-sm" viewBox="0 0 24 24">
           <path
             fill="currentColor"
             d="M10.6 13.4l-1.4 1.4-4-4c-.8-.8-.8-2 0-2.8l4-4 1.4 1.4L7.8 8.2c.4.1.8.3 1.1.6l1.7 1.7zm2.8-2.8l1.4-1.4 4 4c.8.8.8 2 0 2.8l-4 4-1.4-1.4 2.8-2.8c-.4-.1-.8-.3-1.1-.6l-1.7-1.7zm1.4 5.6l4 4-1.4 1.4-4-4 1.4-1.4zm-5.6-5.6L5.2 6.6 6.6 5.2l4 4-1.4 1.4z"
@@ -190,11 +193,11 @@ defineExpose({
 
     <!-- Loading Skeleton -->
     <div v-if="isLoading" class="songs-grid skeleton-container">
-      <div v-for="n in 8" :key="n" class="song-card skeleton-card">
-        <div class="skeleton-thumb"></div>
-        <div class="skeleton-meta">
-          <div class="skeleton-line line-title"></div>
-          <div class="skeleton-line line-sub"></div>
+      <div v-for="n in 8" :key="n" class="skeleton-row">
+        <div class="skeleton-box"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line" style="width: 70%;"></div>
+          <div class="skeleton-line" style="width: 45%;"></div>
         </div>
       </div>
     </div>

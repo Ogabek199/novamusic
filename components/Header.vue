@@ -63,8 +63,8 @@ const onRefreshClick = () => {
         </div>
         <div class="header-brand-info">
           <div class="brand-text-row">
-            <span class="brand-name-yt font-black tracking-tight text-white">Nova</span>
-            <span class="brand-name-music font-extrabold text-nova-500">Music</span>
+            <span class="brand-name-yt">Nova</span>
+            <span class="brand-name-music">Music</span>
           </div>
           <div class="header-status-pill" id="headerStatusPill">
             <span class="status-pulse-dot"></span>

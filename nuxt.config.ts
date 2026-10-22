@@ -21,7 +21,8 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: {
-        lang: 'uz'
+        lang: 'uz',
+        class: 'dark'
       },
       title: 'NovaMusic - Apple Music PWA',
       meta: [

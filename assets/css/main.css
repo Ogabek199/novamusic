@@ -3,24 +3,24 @@
    ========================================================================== */
 
 :root {
-  /* Ranglar - Light Mode (Standart) */
-  --ios-bg-base: #f2f2f7;
-  --ios-bg-card: #ffffff;
-  --ios-bg-card-secondary: #e5e5ea;
-  --ios-bg-blur: rgba(249, 249, 249, 0.78);
-  --ios-bg-sheet: #ffffff;
+  /* Ranglar - Standart Apple Music Dark Mode */
+  --ios-bg-base: #000000;
+  --ios-bg-card: #1c1c1e;
+  --ios-bg-card-secondary: #2c2c2e;
+  --ios-bg-blur: rgba(28, 28, 30, 0.82);
+  --ios-bg-sheet: #1c1c1e;
   
   --ios-accent: #FA2D48; /* Apple Music Red/Pink */
   --ios-accent-rgb: 250, 45, 72;
   --ios-accent-hover: #e0243d;
 
-  --ios-text-primary: #000000;
+  --ios-text-primary: #ffffff;
   --ios-text-secondary: #8e8e93;
-  --ios-text-tertiary: #c7c7cc;
+  --ios-text-tertiary: #48484a;
 
-  --ios-separator: rgba(60, 60, 67, 0.12);
-  --ios-card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --ios-active-overlay: rgba(0, 0, 0, 0.05);
+  --ios-separator: rgba(84, 84, 88, 0.28);
+  --ios-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --ios-active-overlay: rgba(255, 255, 255, 0.08);
 
   --ios-tab-bar-height: 52px;
   --ios-mini-player-height: 56px;
@@ -30,23 +30,8 @@
   --ios-spring-duration: 0.45s;
 }
 
-/* Dark Mode (Avtomatik yoki tizim bo'yicha) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ios-bg-base: #000000;
-    --ios-bg-card: #1c1c1e;
-    --ios-bg-card-secondary: #2c2c2e;
-    --ios-bg-blur: rgba(28, 28, 30, 0.75);
-    --ios-bg-sheet: #1c1c1e;
-
-    --ios-text-primary: #ffffff;
-    --ios-text-secondary: #8e8e93;
-    --ios-text-tertiary: #48484a;
-
-    --ios-separator: rgba(84, 84, 88, 0.28);
-    --ios-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --ios-active-overlay: rgba(255, 255, 255, 0.08);
-  }
+html.dark, :root {
+  color-scheme: dark;
 }
 
 /* Reset & Asosiy parametrlar */

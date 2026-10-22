@@ -42,7 +42,7 @@ const currentCountry = computed(() => {
       <button
         v-for="g in GENRES"
         :key="g.id"
-        class="chip-pill"
+        class="ios-chip"
         :class="{ active: activeGenre === g.id }"
         @click="emit('select-genre', g.id)"
       >
