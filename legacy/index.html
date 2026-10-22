@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Musiqa - Apple Music PWA</title>
+  
+  <!-- PWA Manifest & Asosiy Meta teglar -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FA2D48">
+  <meta name="description" content="YouTube musiqalarini takrorlanmasdan tinglang. Apple Music uslubidagi PWA.">
+
+  <!-- iOS Safari Maxsus Meta Teglari -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Musiqa">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+
+  <!-- Asosiy iOS Stil Fayli -->
+  <link rel="stylesheet" href="style.css?v=2.5">
+</head>
+<body>
+
+  <!-- Ilova Asosiy Konteyneri -->
+  <div class="ios-app" id="app">
+    
+    <!-- Oflayn Xabar Paneli -->
+    <div id="offlineBanner" class="offline-banner hidden">
+      <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4c4.4 0 8 3.6 8 8 0 1.6-.5 3.1-1.3 4.4l-1.5-1.5c.5-.9.8-1.9.8-2.9 0-3.3-2.7-6-6-6-1 0-2 .3-2.9.8L7.6 5.3C8.9 4.5 10.4 4 12 4zm9.7 17.1L3.3 2.7 2 4l2.5 2.5C2.9 8.1 2 10 2 12c0 5.5 4.5 10 10 10 2 0 3.9-.6 5.5-1.7l2.8 2.8 1.4-1.3zM12 20c-4.4 0-8-3.6-8-8 0-1.4.4-2.8 1.1-4l10.9 10.9c-1.2.7-2.6 1.1-4 1.1z"/></svg>
+      <span>Internet yo'q. Keshdagi musiqalar ko'rsatilmoqda.</span>
+    </div>
+
+
+    <!-- 3. Redesigned iOS Fixed Header -->
+    <header class="ios-navbar app-fixed-header" id="iosNavbar">
+      <div class="navbar-blur-bg"></div>
+      <div class="navbar-content">
+        <!-- Chap: YouTube Music Brand va Anti-Repeat Status -->
+        <div class="header-brand-container" id="headerBrand" role="button" tabindex="0" title="Yuqoriga qaytish">
+          <div class="header-logo-badge">
+            <svg class="yt-music-logo-svg" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.18"/>
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+            </svg>
+            <span class="logo-glow-ring"></span>
+          </div>
+          <div class="header-brand-info">
+            <div class="brand-text-row">
+              <span class="brand-name-yt">YouTube</span>
+              <span class="brand-name-music">Music</span>
+            </div>
+            <div class="header-status-pill" id="headerStatusPill">
+              <span class="status-pulse-dot"></span>
+              <span class="status-pill-text" id="headerDynamicStatus">Anti-Repeat</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- O'rta: Inline Sarlavha (Kichik ekran yoki scroll bo'lganda kontekst) -->
+        <div class="navbar-inline-title" id="navbarInlineTitle">Musiqa</div>
+
+        <!-- O'ng: Interaktiv Tugmalar -->
+        <div class="header-actions-group">
+          <!-- Til tanlash Select Dropdown (UZ, RU, EN) -->
+          <div class="header-lang-select-wrapper" title="Tilni tanlang">
+            <select id="headerLangSelect" class="header-lang-select" aria-label="Tilni tanlang">
+              <option value="uz">🇺🇿 UZ</option>
+              <option value="ru">🇷🇺 RU</option>
+              <option value="en">🇬🇧 EN</option>
+            </select>
+            <svg class="sf-icon-xxs lang-select-arrow" viewBox="0 0 24 24"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+          </div>
+
+          <!-- Yangilash / Aralashtirish tugmasi -->
+          <button class="navbar-action-icon-btn" id="navbarActionBtn" title="Yangilash va aralashtirish" aria-label="Musiqalarni yangilash">
+            <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.3 2-.7 2.8l1.5 1.5C19.5 14.9 20 13.5 20 12c0-4.4-3.6-8-8-8zm-6.8 1.7L3.7 7.2C4.5 8.6 5 10.2 5 12c0 4.4 3.6 8 8 8v3l4-4-4-4v3c-3.3 0-6-2.7-6-6 0-1.2.4-2.4 1.2-3.3z"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Asosiy Scroll Maydoni -->
+    <div class="ios-scroll-container" id="scrollContainer">
+      
+      <!-- TAB 1: Bosh Sahifa (Musiqa) -->
+      <section class="tab-page active" id="tabHome">
+        
+        <!-- iOS Large Title & Trend Belgisi -->
+        <div class="large-title-header flex-header" id="largeTitleHeader">
+          <div>
+            <span class="sub-heading" data-i18n="smart_picks_sub">AQLLI ALGORITM TAVSIYALARI</span>
+            <h1 class="large-title" data-i18n="music">Musiqa</h1>
+          </div>
+          <div class="hero-trend-badge" id="heroTrendBadge">
+            <svg class="hero-badge-svg" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.61 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+            <span class="hero-badge-text" data-i18n="top_trends">Top Trendlar</span>
+          </div>
+        </div>
+
+        <!-- Bosh sahifa Qidiruv (Fixed / Sticky tepada) -->
+        <div class="home-search-sticky-bar" id="homeSearchStickyBar">
+          <div class="ios-search-field home-search-field">
+            <svg class="sf-icon-xs home-search-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>
+            <input type="text" id="homeSearchInput" placeholder="Musiqa, qo'shiqchi yoki janrni qidiring..." autocomplete="off" enterkeyhint="search" data-i18n-placeholder="search_home_placeholder" aria-label="Bosh sahifada musiqa qidirish">
+            <button type="button" id="clearHomeSearchBtn" class="search-clear-btn hidden" aria-label="Tozalash">&times;</button>
+          </div>
+        </div>
+
+        <!-- 5. Janr Filtrlari va Davlat Tanlash Select (Janrlar oldida) -->
+        <div class="chips-scroll-view">
+          <div class="chips-track" id="genreChipsTrack">
+            <!-- Davlatni tanlash Select (Janrlar oldida) -->
+            <div class="ios-country-chip-select-wrapper" id="countrySelectWrapper" title="Davlat bo'yicha trendlar">
+              <select id="genreCountrySelect" class="ios-country-chip-select" aria-label="Davlatni tanlang">
+                <!-- Options JS orqali to'ldiriladi -->
+              </select>
+              <svg class="sf-icon-xxs country-chip-arrow" viewBox="0 0 24 24"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+            </div>
+
+            <button class="ios-chip active" data-genre="all" data-i18n="genre_all">Barchasi</button>
+            <button class="ios-chip" data-genre="Pop" data-i18n="genre_pop">Pop</button>
+            <button class="ios-chip" data-genre="Rap" data-i18n="genre_rap">Rap / Hip-Hop</button>
+            <button class="ios-chip" data-genre="Rock" data-i18n="genre_rock">Rock</button>
+            <button class="ios-chip" data-genre="Uzbek" data-i18n="genre_uzbek">O'zbekcha</button>
+            <button class="ios-chip" data-genre="Remix" data-i18n="genre_remix">Remix</button>
+            <button class="ios-chip" data-genre="New" data-i18n="genre_new">Yangi 2025</button>
+            <button class="ios-chip" data-genre="Chill" data-i18n="genre_chill">Chill & Lofi</button>
+          </div>
+        </div>
+
+        <!-- PWA "Ilovani o'rnating" Promo Banner (Headerda emas, sahifa ichida) -->
+        <div id="a2hsBanner" class="home-pwa-banner hidden">
+          <div class="home-pwa-left">
+            <img src="icons/apple-touch-icon-180.png" alt="Musiqa" class="home-pwa-icon">
+            <div class="home-pwa-text">
+              <strong data-i18n="pwa_install_title">Musiqa ilovasini o'rnating</strong>
+              <p id="a2hsInstructions" data-i18n="pwa_install_desc">Ilovani to'liq ekranda qulay tinglash uchun o'rnating.</p>
+            </div>
+          </div>
+          <div class="home-pwa-actions">
+            <button id="a2hsInstallBtn" class="home-pwa-install-btn" data-i18n="pwa_install_btn">O'rnatish</button>
+            <button id="a2hsCloseBtn" class="home-pwa-close-btn" aria-label="Yopish">&times;</button>
+          </div>
+        </div>
+
+        <!-- Takrorlanmaslik Status Bar -->
+        <div class="ios-status-bar">
+          <div class="status-left">
+            <span class="status-dot"></span>
+            <span class="status-text" id="statusTrackCount" data-i18n="songs_filtering">Takrorlanmas qo'shiqlar yuklanmoqda...</span>
+          </div>
+          <button id="shuffleSongsBtn" class="ios-text-btn">
+            <svg class="sf-icon-sm" viewBox="0 0 24 24"><path fill="currentColor" d="M10.6 13.4l-1.4 1.4-4-4c-.8-.8-.8-2 0-2.8l4-4 1.4 1.4L7.8 8.2c.4.1.8.3 1.1.6l1.7 1.7zm2.8-2.8l1.4-1.4 4 4c.8.8.8 2 0 2.8l-4 4-1.4-1.4 2.8-2.8c-.4-.1-.8-.3-1.1-.6l-1.7-1.7zm1.4 5.6l4 4-1.4 1.4-4-4 1.4-1.4zm-5.6-5.6L5.2 6.6 6.6 5.2l4 4-1.4 1.4z"/></svg>
+            <span data-i18n="shuffle_btn">Aralashtirish</span>
+          </button>
+        </div>
+
+        <!-- Qo'shiqlar Ro'yxati / To'ri -->
+        <div class="songs-list" id="songsContainer">
+          <!-- Skeleton yoki qo'shiq elementlari script.js orqali joylanadi -->
+        </div>
+
+        <!-- Cheksiz Scroll Yuklash indikatori -->
+        <div id="infiniteScrollLoader" class="infinite-scroll-loader hidden">
+          <div class="ios-spinner-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <span class="infinite-loader-text" data-i18n="loading_more_songs">Ko'proq musiqalar yuklanmoqda...</span>
+        </div>
+
+        <!-- Barcha musiqalar yuklangandagi eslatma -->
+        <div id="infiniteScrollEndHint" class="infinite-scroll-end-hint hidden">
+          <span data-i18n="all_songs_loaded">Barcha musiqalar yuklandi ✨</span>
+        </div>
+
+        <!-- 8. "Hammasini eshitibsiz" Holati -->
+        <div id="allHeardState" class="all-heard-card hidden">
+          <div class="all-heard-icon">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          </div>
+          <h2 data-i18n="all_heard_title">Hammasini eshitibsiz!</h2>
+          <p data-i18n="all_heard_desc">Ushbu bo'limdagi barcha musiqalar avval tinglangan. Yangi oqim uchun tarixni tozalashingiz mumkin.</p>
+          <button id="clearHistoryFromEmptyBtn" class="ios-btn-primary" data-i18n="clear_history_btn">Tarixni tozalash</button>
+        </div>
+
+      </section>
+
+      <!-- TAB 2: Qidiruv (Search) -->
+      <section class="tab-page hidden" id="tabSearch">
+        <div class="large-title-header">
+          <h1 class="large-title" data-i18n="search_title">Qidiruv</h1>
+        </div>
+
+        <!-- iOS Qidiruv Maydoni -->
+        <div class="ios-search-wrapper">
+          <div class="ios-search-field">
+            <svg class="sf-icon-sm" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="search" id="searchInput" placeholder="Qo'shiq, san'atkor yoki janr..." data-i18n-placeholder="search_placeholder" autocomplete="off">
+            <button id="clearSearchBtn" class="search-clear-btn hidden">&times;</button>
+          </div>
+        </div>
+
+        <div class="search-results-list" id="searchResultsContainer">
+          <div class="search-initial-hint">
+            <p data-i18n="search_initial_hint">Sevimli ijrochingiz yoki musiqangizni qidiring. Eshitilganlar bu yerda ham avtomatik chiqarib tashlanadi.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Tarix (History) -->
+      <section class="tab-page hidden" id="tabHistory">
+        <div class="large-title-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <span class="sub-heading" data-i18n="history_sub">ESHITILGANLAR</span>
+            <h1 class="large-title" data-i18n="history_title">Tarix</h1>
+          </div>
+          <button id="clearAllHistoryBtn" class="ios-text-btn danger-text" data-i18n="clear_btn">Tozalash</button>
+        </div>
+
+        <div class="history-list-view" id="historyContainer">
+          <!-- Tarix elementlari joylanadi -->
+        </div>
+
+        <div id="historyEmptyState" class="empty-placeholder-card hidden">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v9.28a4.39 4.39 0 00-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+          <h3 data-i18n="history_empty_title">Hozircha tarix bo'sh</h3>
+          <p data-i18n="history_empty_desc">Kamida 30 soniya yoki 50% eshitilgan musiqalar bu yerda avtomatik saqlanib boriladi.</p>
+        </div>
+      </section>
+
+      <!-- TAB 4: Sozlamalar (Settings) -->
+      <section class="tab-page hidden" id="tabSettings">
+        <div class="large-title-header">
+          <span class="sub-heading" data-i18n="settings_sub">PARAMETRLAR VA SOZLAMALAR</span>
+          <h1 class="large-title" data-i18n="settings_title">Sozlamalar</h1>
+        </div>
+
+        <div class="ios-grouped-list">
+          
+          <!-- 1. Algoritm Sozlamalari -->
+          <div class="group-header" data-i18n="settings_group_algorithm">TAKRORLANMASLIK ALGORITMI</div>
+          <div class="group-cells">
+            <div class="ios-cell">
+              <div class="cell-main-left">
+                <div class="cell-icon-badge purple-badge">
+                  <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg>
+                </div>
+                <div class="cell-label-text">
+                  <span class="cell-title" data-i18n="settings_retention_label">Qayta chiqish muddati</span>
+                  <span class="cell-subtitle" data-i18n="settings_retention_sub">Eshitilgan qo'shiq qancha vaqt ko'rsatilmasin</span>
+                </div>
+              </div>
+              <select id="retentionSelect" class="ios-select">
+                <option value="never" data-i18n="settings_retention_never">Hech qachon</option>
+                <option value="7d" data-i18n="settings_retention_7d">7 kundan keyin</option>
+                <option value="30d" data-i18n="settings_retention_30d">30 kundan keyin</option>
+              </select>
+            </div>
+
+            <div class="ios-cell">
+              <div class="cell-main-left">
+                <div class="cell-icon-badge blue-badge">
+                  <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                </div>
+                <div class="cell-label-text">
+                  <span class="cell-title" data-i18n="settings_country_label">Mintaqa va davlat</span>
+                  <span class="cell-subtitle" data-i18n="settings_country_sub">YouTube trendlari qaysi davlatdan olinsin</span>
+                </div>
+              </div>
+              <select id="settingsCountrySelect" class="ios-select">
+                <!-- Davlatlar JS orqali to'ldiriladi -->
+              </select>
+            </div>
+
+            <div class="ios-cell">
+              <div class="cell-main-left">
+                <div class="cell-icon-badge orange-badge">
+                  <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                </div>
+                <div class="cell-label-text">
+                  <span class="cell-title" data-i18n="settings_lang_label">Ilova tili</span>
+                  <span class="cell-subtitle" data-i18n="settings_lang_sub">Interfeys va ma'lumotlar tili</span>
+                </div>
+              </div>
+              <select id="settingsLangSelect" class="ios-select">
+                <option value="uz">🇺🇿 O'zbekcha</option>
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="en">🇬🇧 English</option>
+              </select>
+            </div>
+          </div>
+          <div class="group-footer-hint" data-i18n="settings_group_hint">
+            Kamida 30 soniya yoki 50% eshitilgan musiqalar tanlangan muddat davomida tavsiyalardan yashiriladi.
+          </div>
+
+          <!-- 2. Tarix va Xotira Statistikasi -->
+          <div class="group-header" data-i18n="settings_group_stats">XOTIRA VA TARIX STATISTIKASI</div>
+          <div class="group-cells">
+            <div class="ios-cell readonly">
+              <div class="cell-main-left">
+                <div class="cell-icon-badge green-badge">
+                  <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                </div>
+                <span class="cell-title" data-i18n="settings_total_listened">Jami eshitilganlar</span>
+              </div>
+              <span class="cell-value" id="statsHeardCount">0 ta</span>
+            </div>
+
+            <div class="ios-cell readonly">
+              <div class="cell-main-left">
+                <div class="cell-icon-badge gray-badge">
+                  <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27z"/></svg>
+                </div>
+                <span class="cell-title" data-i18n="settings_hidden_songs">Yashirilgan musiqalar</span>
+              </div>
+              <span class="cell-value" id="statsHiddenCount">0 ta</span>
+            </div>
+
+            <button type="button" id="settingsClearHistoryBtn" class="ios-cell-btn-danger">
+              <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+              <span data-i18n="settings_clear_all_btn">Barcha eshitilganlar tarixini tozalash...</span>
+            </button>
+          </div>
+
+          <!-- 4. Ilova Haqida -->
+          <div class="group-header" data-i18n="settings_group_about">ILOVA HAQIDA</div>
+          <div class="group-cells">
+            <div class="ios-cell" id="settingsInstallRow" role="button" tabindex="0" style="cursor: pointer;">
+              <div class="cell-main-left">
+                <div class="cell-icon-badge orange-badge">
+                  <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                </div>
+                <span class="cell-title" data-i18n="pwa_install_title">Musiqa ilovasini o'rnating</span>
+              </div>
+              <span class="cell-value" style="color: var(--ios-accent); font-weight: 700;" data-i18n="pwa_install_btn">O'rnatish</span>
+            </div>
+            <div class="ios-cell readonly">
+              <span class="cell-title" data-i18n="settings_app_version">Ilova versiyasi</span>
+              <span class="cell-value">2.5.0 (Apple Music iOS PWA)</span>
+            </div>
+            <div class="ios-cell readonly">
+              <span class="cell-title" data-i18n="settings_player_engine">Pleyer dvigateli</span>
+              <span class="cell-value">YouTube IFrame API</span>
+            </div>
+            <div class="ios-cell readonly">
+              <span class="cell-title" data-i18n="settings_cache_offline">Kesh va Oflayn</span>
+              <span class="cell-value">Service Worker (<span data-i18n="settings_active">Faol</span>)</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Scroll osti bo'sh joy (Mini pleyer va Tab bar yopib qo'ymasligi uchun) -->
+      <div class="bottom-safe-spacer"></div>
+
+    </div>
+
+    <!-- 7. Mini Pleyer (Tab bar tepasida suzib yuruvchi blur panel) -->
+    <aside class="ios-mini-player" id="miniPlayer">
+      <div class="mini-player-blur"></div>
+      <div class="mini-player-content" id="miniPlayerOpenArea">
+        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80" alt="Muqova" id="miniPlayerThumb" class="mini-thumb">
+        <div class="mini-player-info">
+          <div class="mini-title" id="miniPlayerTitle" data-i18n="no_song_selected">Musiqa tanlanmagan</div>
+          <div class="mini-artist" id="miniPlayerArtist" data-i18n="player_subtitle_default">Apple Music PWA</div>
+        </div>
+      </div>
+      <div class="mini-player-actions">
+        <button id="miniPlayPauseBtn" class="mini-action-btn" title="Ijro / Pauza">
+          <svg class="sf-icon" id="miniPlayIcon" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button id="miniNextBtn" class="mini-action-btn" title="Keyingi">
+          <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- 4. iOS Floating Tab Bar (Pill Island + Alohida Qidiruv Tugmasi) -->
+    <nav class="ios-floating-bar-wrapper" id="iosTabBar">
+      <!-- Asosiy navigatsiya orolchasi (Pill Island) -->
+      <div class="ios-tab-bar-island">
+        <button class="tab-item active" data-tab="tabHome">
+          <div class="tab-icon-wrapper">
+            <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+          </div>
+          <span class="tab-label" data-i18n="tab_home">Bosh sahifa</span>
+        </button>
+
+        <button class="tab-item" data-tab="tabHistory">
+          <div class="tab-icon-wrapper">
+            <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            <span class="tab-badge" id="tabHistoryBadge">0</span>
+          </div>
+          <span class="tab-label" data-i18n="tab_history">Tarix</span>
+        </button>
+
+        <button class="tab-item" data-tab="tabSettings">
+          <div class="tab-icon-wrapper">
+            <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          </div>
+          <span class="tab-label" data-i18n="tab_settings">Sozlamalar</span>
+        </button>
+      </div>
+
+      <!-- Alohida Qidiruv tugmasi (Search Button) -->
+      <button class="tab-item tab-search-fab" data-tab="tabSearch" title="Qidiruv" aria-label="Qidiruv">
+        <div class="search-fab-icon-box">
+          <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </div>
+      </button>
+    </nav>
+
+    <!-- 7. To'liq Ekranli iOS Pleyer (Bottom Sheet Modal) -->
+    <div class="ios-full-player-sheet" id="fullPlayerSheet">
+      <!-- Orqa fon bluri va rang gradiyenti -->
+      <div class="sheet-backdrop-blur"></div>
+      <div class="sheet-art-ambient-glow" id="sheetAmbientGlow"></div>
+
+      <!-- Pastga surish tutqichi (Drag handle) -->
+      <div class="sheet-drag-handle-wrapper" id="sheetDragHandle">
+        <div class="sheet-drag-handle"></div>
+      </div>
+
+      <div class="sheet-inner-container">
+        <!-- Katta kvadrat muqova -->
+        <div class="sheet-artwork-wrapper">
+          <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80" alt="Katta muqova" id="fullPlayerThumb" class="sheet-artwork-img">
+        </div>
+
+        <!-- Qo'shiq Ma'lumotlari -->
+        <div class="sheet-track-info">
+          <div class="sheet-text-meta">
+            <h2 class="sheet-track-title" id="fullPlayerTitle" data-i18n="no_song_selected">Qo'shiq tanlanmagan</h2>
+            <div class="sheet-artist-row">
+              <p class="sheet-track-artist" id="fullPlayerArtist" data-i18n="artist_placeholder">Ijrochi</p>
+              <span class="anti-repeat-badge" title="30 soniya yoki 50% eshitilganda avtomatik ro'yxatdan o'chiriladi">
+                <svg class="sf-icon-xs" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                <span data-i18n="anti_repeat">Anti-Repeat</span>
+              </span>
+            </div>
+          </div>
+          <div class="sheet-quick-actions">
+            <button id="fullMarkListenedBtn" class="sheet-round-btn" title="Tarixga saqlash">
+              <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            </button>
+            <button id="fullHideSongBtn" class="sheet-round-btn" title="Yashirish (Qora ro'yxat)">
+              <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress Slider -->
+        <div class="sheet-progress-section">
+          <input type="range" id="fullTimelineSlider" min="0" max="100" value="0" class="ios-slider">
+          <div class="sheet-time-labels">
+            <span id="fullCurrentTime">0:00</span>
+            <span id="fullDuration">0:00</span>
+          </div>
+        </div>
+
+        <!-- Boshqaruv Tugmalari (Play/Pause, Prev, Next, Shuffle, Loop) -->
+        <div class="sheet-main-controls">
+          <button id="fullShuffleBtn" class="control-secondary-btn" title="Aralashtirish">
+            <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M10.6 13.4l-1.4 1.4-4-4c-.8-.8-.8-2 0-2.8l4-4 1.4 1.4L7.8 8.2c.4.1.8.3 1.1.6l1.7 1.7zm2.8-2.8l1.4-1.4 4 4c.8.8.8 2 0 2.8l-4 4-1.4-1.4 2.8-2.8c-.4-.1-.8-.3-1.1-.6l-1.7-1.7zm1.4 5.6l4 4-1.4 1.4-4-4 1.4-1.4zm-5.6-5.6L5.2 6.6 6.6 5.2l4 4-1.4 1.4z"/></svg>
+          </button>
+          
+          <button id="fullPrevBtn" class="control-nav-btn" title="Oldingi">
+            <svg class="sf-icon-lg" viewBox="0 0 24 24"><path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+
+          <button id="fullPlayPauseBtn" class="control-play-btn" title="Ijro / Pauza">
+            <svg class="sf-icon-hero" id="fullPlayIcon" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          </button>
+
+          <button id="fullNextBtn" class="control-nav-btn" title="Keyingi">
+            <svg class="sf-icon-lg" viewBox="0 0 24 24"><path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+
+          <button id="fullLoopBtn" class="control-secondary-btn" title="Takrorlash">
+            <svg class="sf-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+          </button>
+        </div>
+
+        <!-- Ovoz Sladeri -->
+        <div class="sheet-volume-section">
+          <svg class="sf-icon-sm" viewBox="0 0 24 24"><path fill="currentColor" d="M7 9v6h4l5 5V4l-5 5H7z"/></svg>
+          <input type="range" id="fullVolumeSlider" min="0" max="100" value="80" class="ios-slider">
+          <svg class="sf-icon-sm" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9v6h4l5 5V4l-5 5H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- iOS Davlat Tanlash Action Sheet (Country Picker Modal) -->
+    <div class="ios-action-sheet-overlay hidden" id="countrySheetOverlay">
+      <div class="ios-action-sheet" id="countrySheet">
+        <div class="action-sheet-header">
+          <div class="action-sheet-handle"></div>
+          <h3 data-i18n="select_country">Davlat / Hududni tanlang</h3>
+          <p data-i18n="settings_country_sub">YouTube'da ushbu davlatning eng ommabop musiqalari takrorlanmasdan yuklanadi</p>
+        </div>
+        <div class="country-list-scroll" id="countryListContainer">
+          <!-- Davlatlar ro'yxati JS orqali to'ldiriladi -->
+        </div>
+        <button class="action-sheet-cancel-btn" id="closeCountrySheetBtn" data-i18n="confirm_cancel">Bekor qilish</button>
+      </div>
+    </div>
+
+    <!-- iOS Tasdiqlash Modali (Action Dialog) -->
+    <div class="ios-action-sheet-overlay hidden" id="confirmDialogOverlay">
+      <div class="ios-confirm-box">
+        <h3 id="confirmDialogTitle" data-i18n="confirm_title">Tarixni tozalash</h3>
+        <p id="confirmDialogMessage" data-i18n="confirm_message">Haqiqatan ham barcha eshitilganlar tarixini tozalamoqchimisiz? Eshitilgan musiqalar yana tavsiyalarda ko'rina boshlaydi.</p>
+        <div class="confirm-actions-stack">
+          <button type="button" class="confirm-btn danger-btn" id="confirmAcceptBtn" data-i18n="confirm_accept">Ha, tozalash</button>
+          <button type="button" class="confirm-btn cancel-btn" id="confirmCancelBtn" data-i18n="confirm_cancel">Bekor qilish</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yashirin YouTube IFrame Pleyeri -->
+    <div class="hidden-yt-player-slot">
+      <div id="youtubePlayer"></div>
+    </div>
+
+    <!-- iOS Toast Bildirishnoma Konteyneri -->
+    <div id="iosToast" class="ios-toast-pill hidden">
+      <span id="iosToastText">Xabar</span>
+    </div>
+
+  </div>
+
+  <!-- Skriptlar -->
+  <script src="config.js?v=2.5"></script>
+  <script src="script.js?v=2.5"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>

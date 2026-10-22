@@ -1,0 +1,2496 @@
+/* ==========================================================================
+   Apple Music iOS Design System - PWA Style Sheet
+   ========================================================================== */
+
+:root {
+  /* Ranglar - Light Mode (Standart) */
+  --ios-bg-base: #f2f2f7;
+  --ios-bg-card: #ffffff;
+  --ios-bg-card-secondary: #e5e5ea;
+  --ios-bg-blur: rgba(249, 249, 249, 0.78);
+  --ios-bg-sheet: #ffffff;
+  
+  --ios-accent: #FA2D48; /* Apple Music Red/Pink */
+  --ios-accent-rgb: 250, 45, 72;
+  --ios-accent-hover: #e0243d;
+
+  --ios-text-primary: #000000;
+  --ios-text-secondary: #8e8e93;
+  --ios-text-tertiary: #c7c7cc;
+
+  --ios-separator: rgba(60, 60, 67, 0.12);
+  --ios-card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --ios-active-overlay: rgba(0, 0, 0, 0.05);
+
+  --ios-tab-bar-height: 52px;
+  --ios-mini-player-height: 56px;
+  --ios-navbar-height: 58px;
+
+  --ios-spring-easing: cubic-bezier(0.32, 0.72, 0, 1);
+  --ios-spring-duration: 0.45s;
+}
+
+/* Dark Mode (Avtomatik yoki tizim bo'yicha) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ios-bg-base: #000000;
+    --ios-bg-card: #1c1c1e;
+    --ios-bg-card-secondary: #2c2c2e;
+    --ios-bg-blur: rgba(28, 28, 30, 0.75);
+    --ios-bg-sheet: #1c1c1e;
+
+    --ios-text-primary: #ffffff;
+    --ios-text-secondary: #8e8e93;
+    --ios-text-tertiary: #48484a;
+
+    --ios-separator: rgba(84, 84, 88, 0.28);
+    --ios-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --ios-active-overlay: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Reset & Asosiy parametrlar */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  background-color: var(--ios-bg-base);
+  color: var(--ios-text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior-y: none;
+}
+
+/* App Wrapper */
+.ios-app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--ios-bg-base);
+}
+
+/* SF Ikonkalar */
+.sf-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.sf-icon-sm { width: 18px; height: 18px; }
+.sf-icon-xs { width: 14px; height: 14px; }
+.sf-icon-lg { width: 28px; height: 28px; }
+.sf-icon-hero { width: 36px; height: 36px; }
+
+/* ==========================================================================
+   Oflayn & Add to Home Screen (A2HS) Bannerlari
+   ========================================================================== */
+
+.offline-banner {
+  position: fixed;
+  top: env(safe-area-inset-top, 0);
+  left: 12px;
+  right: 12px;
+  background: rgba(255, 149, 0, 0.95);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+/* ==========================================================================
+   PWA Ilovani o'rnatish Banneri (Bosh sahifadagi iOS Karta)
+   ========================================================================== */
+
+.home-pwa-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--ios-bg-card);
+  border: 1px solid var(--ios-separator);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 0 0 16px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  animation: pwaBannerFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes pwaBannerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-pwa-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.home-pwa-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(250, 45, 72, 0.3);
+  flex-shrink: 0;
+}
+
+.home-pwa-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-pwa-text strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ios-text-primary);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-pwa-text p {
+  font-size: 11.5px;
+  color: var(--ios-text-secondary);
+  margin-top: 2px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.home-pwa-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.home-pwa-install-btn {
+  background: var(--ios-accent);
+  color: #ffffff;
+  border: none;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 15px;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(250, 45, 72, 0.35);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.home-pwa-install-btn:active {
+  transform: scale(0.94);
+}
+
+.home-pwa-close-btn {
+  background: var(--ios-bg-card-secondary);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--ios-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.home-pwa-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--ios-text-primary);
+}
+
+/* ==========================================================================
+   Redesigned iOS Fixed Header (Glassmorphic Top Bar)
+   ========================================================================== */
+
+.ios-navbar {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  left: 12px;
+  right: 12px;
+  width: calc(100% - 24px);
+  max-width: 1240px;
+  margin: 0 auto;
+  height: var(--ios-navbar-height);
+  border-radius: 18px;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
+  border: 1px solid var(--ios-separator);
+  background: var(--ios-bg-blur);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.navbar-blur-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  background: var(--ios-bg-blur);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  opacity: 0.98;
+  transition: opacity 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ios-navbar.scrolled {
+  box-shadow: 0 6px 26px rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.ios-navbar.scrolled .navbar-blur-bg {
+  opacity: 0.99;
+}
+
+.navbar-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  gap: 10px;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+/* Header Brand / Logo Section */
+.header-brand-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  flex-shrink: 0;
+}
+
+.header-brand-container:hover {
+  opacity: 0.92;
+}
+
+.header-brand-container:active {
+  transform: scale(0.97);
+}
+
+.header-logo-badge {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF0033 0%, #FA2D48 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(250, 45, 72, 0.45);
+  flex-shrink: 0;
+}
+
+.yt-music-logo-svg {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+.logo-glow-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(250, 45, 72, 0.45);
+  animation: logoGlowPulse 2.8s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes logoGlowPulse {
+  0% { transform: scale(0.92); opacity: 0.9; }
+  50% { transform: scale(1.18); opacity: 0; }
+  100% { transform: scale(0.92); opacity: 0; }
+}
+
+.header-brand-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.brand-text-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  line-height: 1.1;
+}
+
+.brand-name-yt {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ios-text-primary);
+}
+
+.brand-name-music {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ios-accent);
+}
+
+/* Status Pill */
+.header-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(48, 209, 88, 0.12);
+  border: 1px solid rgba(48, 209, 88, 0.3);
+  padding: 2px 7px;
+  border-radius: 10px;
+  width: fit-content;
+  line-height: 1;
+}
+
+.status-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #30D158;
+  box-shadow: 0 0 6px rgba(48, 209, 88, 0.8);
+  animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px rgba(48, 209, 88, 1); }
+}
+
+.status-pill-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: #30D158;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+/* Inline Dynamic Title */
+.navbar-inline-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) translateY(5px);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  opacity: 0;
+  transition: opacity 0.22s var(--ios-spring-easing), transform 0.22s var(--ios-spring-easing);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ios-navbar.scrolled .navbar-inline-title {
+  opacity: 1;
+  transform: translate(-50%, -50%) translateY(0);
+}
+
+/* Header Actions */
+.header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Header Install Button ("Musiqa ilovasini o'rnating") */
+.header-install-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, rgba(250, 45, 72, 0.16) 0%, rgba(250, 45, 72, 0.28) 100%);
+  color: var(--ios-accent);
+  border: 1px solid rgba(250, 45, 72, 0.4);
+  padding: 5px 11px;
+  border-radius: 980px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header-install-pill-btn:hover {
+  background: var(--ios-accent);
+  color: #ffffff;
+  border-color: var(--ios-accent);
+  box-shadow: 0 2px 10px rgba(250, 45, 72, 0.45);
+}
+
+.header-install-pill-btn:active {
+  transform: scale(0.94);
+}
+
+.header-install-pill-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Header Language Select Dropdown */
+.header-lang-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #1c1c1f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0 8px 0 10px;
+  height: 34px;
+  gap: 5px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.header-lang-select-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: #252529;
+}
+
+.lang-globe-icon {
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.header-lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: #f4f4f5;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  outline: none;
+  cursor: pointer;
+  padding-right: 18px;
+  font-family: inherit;
+  line-height: 34px;
+  height: 34px;
+}
+
+.header-lang-select option {
+  background: #1c1c1f;
+  color: #f4f4f5;
+  font-weight: 600;
+}
+
+.lang-select-arrow {
+  position: absolute;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  color: #8e8e93;
+  pointer-events: none;
+}
+
+/* 3-Language Segmented Control (Legacy fallback) */
+.ios-lang-segmented {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 0.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 980px;
+  padding: 2.5px;
+  gap: 2px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.lang-seg-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 4px 7.5px;
+  border-radius: 980px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+}
+
+.lang-seg-btn:hover {
+  color: #ffffff;
+}
+
+.lang-seg-btn.active {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.35);
+}
+
+.header-country-pill {
+  background: var(--ios-bg-card-secondary);
+  color: var(--ios-text-primary);
+  border: 1px solid var(--ios-separator);
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  margin-bottom: 0;
+}
+
+.header-country-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.header-country-pill:active {
+  transform: scale(0.94);
+}
+
+.navbar-action-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #1c1c1f;
+  color: #ef4444;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar-action-icon-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+
+.navbar-action-icon-btn:active {
+  transform: scale(0.92);
+}
+
+.navbar-action-icon-btn.spinning svg {
+  animation: actionSpin 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes actionSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Scroll Container & Hero Header Badges
+   ========================================================================== */
+
+.ios-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(var(--ios-navbar-height) + env(safe-area-inset-top, 0px) + 18px);
+}
+
+.tab-page {
+  padding: 0 16px;
+}
+
+.large-title-header {
+  padding: 12px 0 16px 0;
+}
+
+.hero-trend-badge {
+  background: rgba(239, 68, 68, 0.06);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+}
+
+.hero-trend-badge:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.65);
+}
+
+.hero-badge-svg {
+  width: 14px;
+  height: 14px;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+@media (max-width: 440px) {
+  .header-status-pill {
+    display: none;
+  }
+  .navbar-inline-title {
+    max-width: 90px;
+  }
+  .header-install-pill-btn {
+    padding: 4.5px 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 380px) {
+  .country-name-el {
+    display: none;
+  }
+  .header-country-pill {
+    padding: 6px 9px;
+  }
+  .header-brand-container {
+    gap: 6px;
+  }
+  .header-logo-badge {
+    width: 30px;
+    height: 30px;
+  }
+  .yt-music-logo-svg {
+    width: 18px;
+    height: 18px;
+  }
+  .brand-name-yt, .brand-name-music {
+    font-size: 14px;
+  }
+  .navbar-content {
+    padding: 0 8px;
+    gap: 5px;
+  }
+  .header-install-text {
+    display: none;
+  }
+  .header-install-pill-btn {
+    padding: 6px;
+    border-radius: 50%;
+  }
+  .navbar-action-icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+
+
+.sub-heading {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ios-text-secondary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.large-title {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--ios-text-primary);
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   Janr Filtrlari (iOS Segmented Chips)
+   ========================================================================== */
+
+.chips-scroll-view {
+  margin: 0 -16px 16px -16px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chips-scroll-view::-webkit-scrollbar {
+  display: none;
+}
+
+.chips-track {
+  display: inline-flex;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.ios-chip {
+  background: #242428;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.ios-chip:hover {
+  background: #2c2c32;
+  color: #ffffff;
+}
+
+.ios-chip:active {
+  transform: scale(0.95);
+}
+
+.ios-chip.active {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+}
+
+/* Davlat Tanlash Select (Janrlar oldidagi chip select) */
+.ios-country-chip-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: #1c1c1f;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--ios-text-primary);
+  padding: 0 8px 0 12px;
+  height: 38px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+  max-width: fit-content;
+}
+
+.ios-country-chip-select-wrapper:hover {
+  background: #26262a;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.ios-country-chip-select-wrapper:active {
+  transform: scale(0.95);
+}
+
+.ios-country-chip-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: #f4f4f5;
+  font-size: 13.5px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  padding-right: 18px;
+  font-family: inherit;
+  line-height: 38px;
+  height: 38px;
+  width: auto;
+  min-width: 60px;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ios-country-chip-select option {
+  background: #1c1c1e;
+  color: #fff;
+  font-size: 14px;
+  padding: 8px;
+}
+
+.country-chip-arrow {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  width: 11px;
+  height: 11px;
+  color: #8e8e93;
+}
+
+/* Takrorlanmaslik Status Bar */
+.ios-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ios-separator);
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34c759; /* iOS Green */
+  box-shadow: 0 0 8px rgba(52, 199, 89, 0.6);
+}
+
+.status-text {
+  font-size: 12.5px;
+  color: var(--ios-text-secondary);
+  font-weight: 500;
+}
+
+.ios-text-btn {
+  background: transparent;
+  border: none;
+  color: var(--ios-accent);
+  font-size: 13.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px 0;
+}
+.ios-text-btn:active {
+  opacity: 0.6;
+}
+.ios-text-btn.danger-text {
+  color: #ff3b30;
+}
+
+/* ==========================================================================
+   Bosh sahifadagi Sticky / Fixed Search Bar
+   ========================================================================== */
+
+.home-search-sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: rgba(10, 10, 12, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin: 0 -16px 12px -16px;
+  padding: 6px 16px 10px 16px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.home-search-sticky-bar.is-stuck {
+  border-bottom-color: var(--ios-separator);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 768px) {
+  .home-search-sticky-bar {
+    margin: 0 0 14px 0;
+    padding: 8px 0 12px 0;
+  }
+}
+
+.home-search-field {
+  width: 100%;
+  background: #18181b;
+  border: 1.5px solid rgba(239, 68, 68, 0.65);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.1);
+  border-radius: 14px;
+  height: 46px;
+  padding: 0 14px;
+  gap: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.home-search-field:focus-within {
+  background: #1c1c20;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444, 0 0 16px rgba(239, 68, 68, 0.25);
+}
+
+.home-search-icon {
+  color: #71717a;
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+}
+
+/* ==========================================================================
+   Qo'shiqlar Ro'yxati & Responsive Grid (Desktop 30, Tablet 20, Mobile 10)
+   ========================================================================== */
+
+.songs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Tablet: 2 ustun */
+@media (min-width: 768px) {
+  .songs-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+/* Desktop: 3 ustun */
+@media (min-width: 1024px) {
+  .tab-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 24px;
+  }
+  .songs-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .songs-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+/* ==========================================================================
+   Cheksiz Scroll (Infinite Scroll) & Yangi elementlar animatsiyasi
+   ========================================================================== */
+
+.infinite-scroll-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 0 32px 0;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.infinite-scroll-loader.hidden {
+  display: none !important;
+}
+
+.ios-spinner-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ios-spinner-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ios-accent);
+  animation: iosDotBounce 1.2s infinite ease-in-out both;
+}
+
+.ios-spinner-dots .dot:nth-child(1) { animation-delay: -0.32s; }
+.ios-spinner-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+.ios-spinner-dots .dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes iosDotBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.35;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.infinite-loader-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+}
+
+.infinite-scroll-end-hint {
+  text-align: center;
+  padding: 20px 0 36px 0;
+  color: var(--ios-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+  grid-column: 1 / -1;
+}
+
+.infinite-scroll-end-hint.hidden {
+  display: none !important;
+}
+
+.song-fade-in {
+  animation: songCardFadeIn 0.35s var(--ios-spring-easing) forwards;
+}
+
+@keyframes songCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ios-song-row-wrapper {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: var(--ios-bg-card);
+  box-shadow: var(--ios-card-shadow);
+  touch-action: pan-y;
+}
+
+/* Orqa fondagi Swipe amallari */
+.swipe-actions-backdrop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  width: 140px;
+  height: 100%;
+  z-index: 1;
+}
+
+.swipe-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 4px;
+  cursor: pointer;
+}
+.swipe-btn-heard { background: #34c759; }
+.swipe-btn-hide { background: #ff3b30; }
+
+.ios-song-card {
+  position: relative;
+  z-index: 2;
+  background: var(--ios-bg-card);
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 12px;
+  border-radius: 14px;
+  transition: transform 0.2s var(--ios-spring-easing);
+  cursor: pointer;
+}
+
+.ios-song-card:active {
+  background: var(--ios-bg-card-secondary);
+}
+
+.song-thumb-box {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--ios-bg-card-secondary);
+}
+
+.song-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.song-duration-tag {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.song-details {
+  flex: 1;
+  overflow: hidden;
+}
+
+.song-title-text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ios-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-artist-text {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-more-btn {
+  background: transparent;
+  border: none;
+  color: var(--ios-text-secondary);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   Skeleton Shimmer Animatsiyasi
+   ========================================================================== */
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--ios-bg-card);
+  border-radius: 14px;
+}
+
+.skeleton-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--ios-bg-card-secondary) 25%, var(--ios-bg-base) 50%, var(--ios-bg-card-secondary) 75%);
+  background-size: 200% 100%;
+  animation: iosShimmer 1.4s infinite;
+}
+
+.skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--ios-bg-card-secondary) 25%, var(--ios-bg-base) 50%, var(--ios-bg-card-secondary) 75%);
+  background-size: 200% 100%;
+  animation: iosShimmer 1.4s infinite;
+}
+
+@keyframes iosShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ==========================================================================
+   "Hammasini eshitibsiz" & Bo'sh holatlar
+   ========================================================================== */
+
+.all-heard-card, .empty-placeholder-card {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--ios-bg-card);
+  border-radius: 20px;
+  box-shadow: var(--ios-card-shadow);
+  margin-top: 20px;
+}
+
+.all-heard-icon svg, .empty-placeholder-card svg {
+  width: 54px;
+  height: 54px;
+  color: var(--ios-accent);
+  margin-bottom: 14px;
+}
+
+.all-heard-card h2, .empty-placeholder-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.all-heard-card p, .empty-placeholder-card p {
+  font-size: 14px;
+  color: var(--ios-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.ios-btn-primary {
+  background: var(--ios-accent);
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(var(--ios-accent-rgb), 0.4);
+  transition: transform 0.15s ease;
+}
+.ios-btn-primary:active {
+  transform: scale(0.96);
+}
+
+/* ==========================================================================
+   Qidiruv & Sozlamalar Sahifasi (Grouped Table View)
+   ========================================================================== */
+
+.ios-search-wrapper {
+  margin-bottom: 16px;
+}
+
+.ios-search-field {
+  background: var(--ios-bg-card-secondary);
+  border-radius: 12px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+}
+
+.ios-search-field input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--ios-text-primary);
+  font-family: inherit;
+}
+
+.search-clear-btn {
+  background: var(--ios-text-secondary);
+  color: var(--ios-bg-card);
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-initial-hint {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ios-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   iOS Sozlamalar (Grouped Table View & Form Controls)
+   ========================================================================== */
+
+.ios-grouped-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-bottom: 20px;
+}
+
+.group-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ios-text-secondary);
+  padding: 0 16px 6px 16px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.group-cells {
+  background: var(--ios-bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--ios-card-shadow);
+}
+
+.ios-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 11px 16px !important;
+  border-bottom: 1px solid var(--ios-separator) !important;
+  font-size: 15px !important;
+  min-height: 48px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.ios-cell:last-child {
+  border-bottom: none !important;
+}
+
+.cell-main-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* iOS Rangli Ikonka Nishonlari (Badges) */
+.cell-icon-badge {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  min-height: 32px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ffffff !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.cell-icon-badge svg {
+  width: 18px !important;
+  height: 18px !important;
+  fill: #ffffff !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+}
+
+.cell-icon-badge svg path {
+  fill: #ffffff !important;
+}
+
+.purple-badge { background: linear-gradient(135deg, #af52de, #5856d6) !important; }
+.blue-badge { background: linear-gradient(135deg, #007aff, #5856d6) !important; }
+.orange-badge { background: linear-gradient(135deg, #ff9500, #ff3b30) !important; }
+.green-badge { background: linear-gradient(135deg, #34c759, #30d158) !important; }
+.gray-badge { background: linear-gradient(135deg, #8e8e93, #636366) !important; }
+
+.cell-label-text {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.cell-title {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: var(--ios-text-primary) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.cell-subtitle {
+  font-size: 12px !important;
+  color: var(--ios-text-secondary) !important;
+  margin-top: 2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.cell-value {
+  color: var(--ios-text-secondary) !important;
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  flex-shrink: 0 !important;
+}
+
+.ios-select {
+  background-color: transparent !important;
+  border: none !important;
+  font-size: 14.5px !important;
+  color: var(--ios-accent) !important;
+  font-weight: 600 !important;
+  outline: none !important;
+  text-align: right !important;
+  text-align-last: right !important;
+  direction: ltr !important;
+  cursor: pointer !important;
+  max-width: 150px !important;
+  flex: 0 0 auto !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  padding: 4px 18px 4px 0 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238e8e93'%3E%3Cpath d='M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right center !important;
+  background-size: 14px !important;
+}
+
+/* Input & Action Tugmalari */
+.input-cell-wrapper {
+  padding: 8px 16px;
+}
+
+.ios-input-field {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14.5px;
+  color: var(--ios-text-primary);
+  outline: none;
+  font-family: inherit;
+}
+
+.ios-input-field::placeholder {
+  color: var(--ios-text-secondary);
+  font-size: 13.5px;
+}
+
+.cell-action-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--ios-text-secondary);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.cell-action-icon-btn:active {
+  background: var(--ios-bg-card-secondary);
+}
+
+/* API Status Xabari */
+.api-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--ios-bg-base);
+  border-top: 1px solid var(--ios-separator);
+  font-size: 12.5px;
+  color: var(--ios-text-secondary);
+}
+
+.api-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8e8e93;
+}
+
+.api-status-dot.valid {
+  background: #34c759;
+  box-shadow: 0 0 8px rgba(52, 199, 89, 0.6);
+}
+
+.api-status-dot.invalid {
+  background: #ff3b30;
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.6);
+}
+
+.api-status-dot.checking {
+  background: #007aff;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.api-status-text.valid { color: #34c759; font-weight: 600; }
+.api-status-text.invalid { color: #ff3b30; font-weight: 600; }
+.api-status-text.checking { color: #007aff; font-weight: 600; }
+
+.api-button-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--ios-bg-card);
+  border-top: 1px solid var(--ios-separator);
+}
+
+.ios-cell-btn-primary {
+  flex: 1;
+  background: var(--ios-accent);
+  color: #ffffff;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.ios-cell-btn-primary:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.ios-cell-btn-secondary {
+  background: var(--ios-bg-card-secondary);
+  color: var(--ios-text-primary);
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.ios-cell-btn-danger {
+  width: 100%;
+  padding: 13px 16px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--ios-separator);
+  color: #ff3b30;
+  font-size: 14.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ios-cell-btn-danger:active {
+  background: rgba(255, 59, 48, 0.08);
+}
+
+.group-footer-hint {
+  padding: 6px 16px 0 16px;
+  font-size: 12px;
+  color: var(--ios-text-secondary);
+  line-height: 1.4;
+}
+
+/* iOS Confirm Action Box */
+.ios-confirm-box {
+  background: var(--ios-bg-card);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 360px;
+  padding: 20px 18px 16px 18px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  animation: toastPop 0.25s var(--ios-spring-easing);
+  margin-bottom: auto;
+  margin-top: auto;
+}
+
+.ios-confirm-box h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--ios-text-primary);
+}
+
+.ios-confirm-box p {
+  font-size: 13.5px;
+  color: var(--ios-text-secondary);
+  line-height: 1.45;
+  margin-bottom: 18px;
+}
+
+.confirm-actions-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confirm-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.confirm-btn.danger-btn {
+  background: #ff3b30;
+  color: #ffffff;
+}
+
+.confirm-btn.cancel-btn {
+  background: var(--ios-bg-card-secondary);
+  color: var(--ios-text-primary);
+}
+
+/* ==========================================================================
+   7. Mini Pleyer (Tab bar tepasida suzib turuvchi panel)
+   ========================================================================== */
+
+.ios-mini-player {
+  position: fixed;
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: calc(100% - 24px);
+  max-width: 460px;
+  height: var(--ios-mini-player-height);
+  border-radius: 18px;
+  overflow: hidden;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s var(--ios-spring-easing);
+}
+
+.ios-mini-player:active {
+  transform: scale(0.98);
+}
+
+.mini-player-blur {
+  position: absolute;
+  inset: 0;
+  background: var(--ios-bg-blur);
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  border: 1px solid var(--ios-separator);
+  z-index: 1;
+}
+
+.mini-player-content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.mini-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mini-player-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.mini-title {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ios-text-primary);
+}
+
+.mini-artist {
+  font-size: 12px;
+  color: var(--ios-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-player-actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+}
+
+.mini-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--ios-text-primary);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.mini-action-btn:active {
+  transform: scale(0.9);
+}
+
+/* ==========================================================================
+   4. iOS Floating Tab Bar (Pill Island + Alohida Qidiruv Tugmasi)
+   ========================================================================== */
+
+.ios-floating-bar-wrapper {
+  position: fixed;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: calc(100% - 24px);
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 450;
+  pointer-events: none;
+}
+
+/* Asosiy navigatsiya orolchasi (Pill Island) */
+.ios-tab-bar-island {
+  flex: 1;
+  height: 60px;
+  background: rgba(28, 28, 30, 0.85);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 0.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 4px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
+}
+
+.ios-tab-bar-island .tab-item {
+  flex: 1;
+  height: 52px;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  padding: 2px 6px;
+}
+
+.ios-tab-bar-island .tab-item:active {
+  transform: scale(0.94);
+}
+
+/* Faol holat (Telegram / Apple iOS oval kapsula orqa foni) */
+.ios-tab-bar-island .tab-item.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.ios-tab-bar-island .tab-item.active .tab-icon-wrapper svg {
+  color: var(--ios-accent);
+}
+
+.ios-tab-bar-island .tab-item.active .tab-label {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.tab-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon-wrapper .sf-icon {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-tab-bar-island .tab-item.active .tab-icon-wrapper .sf-icon {
+  transform: scale(1.08);
+}
+
+/* Tarix / Bildirishnoma belgisi (Badge) */
+.tab-badge {
+  position: absolute;
+  top: -4px;
+  right: -9px;
+  background: #ff3b30;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 17px;
+  height: 17px;
+  line-height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.tab-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  line-height: 1;
+}
+
+/* Alohida suzib turuvchi Qidiruv tugmasi (Search Button) */
+.tab-search-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(28, 28, 30, 0.85);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 0.5px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+.tab-search-fab .search-fab-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.tab-search-fab .sf-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-search-fab:hover {
+  background: rgba(44, 44, 46, 0.95);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.tab-search-fab:active {
+  transform: scale(0.92);
+}
+
+/* Qidiruv faol bo'lganda (Active state) */
+.tab-search-fab.active {
+  background: var(--ios-accent);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 28px rgba(250, 45, 72, 0.45);
+}
+
+.tab-search-fab.active .sf-icon {
+  transform: scale(1.08);
+}
+
+/* Bottom Safe Area Spacer */
+.bottom-safe-spacer {
+  height: calc(80px + var(--ios-mini-player-height) + env(safe-area-inset-bottom, 0) + 36px);
+}
+
+/* ==========================================================================
+   7. To'liq Ekranli iOS Pleyer (Bottom Sheet Modal)
+   ========================================================================== */
+
+.ios-full-player-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  background: var(--ios-bg-sheet);
+  border-radius: 28px 28px 0 0;
+  transform: translateY(100%);
+  transition: transform var(--ios-spring-duration) var(--ios-spring-easing);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top, 16px);
+  padding-bottom: env(safe-area-inset-bottom, 24px);
+}
+
+.ios-full-player-sheet.open {
+  transform: translateY(0);
+}
+
+.sheet-backdrop-blur {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  z-index: 1;
+}
+
+.sheet-art-ambient-glow {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(var(--ios-accent-rgb), 0.25), transparent 70%);
+  filter: blur(60px);
+  z-index: 1;
+}
+
+.sheet-drag-handle-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding-top: 4px;
+}
+
+.sheet-drag-handle {
+  width: 52px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.sheet-drag-handle-wrapper:hover .sheet-drag-handle {
+  transform: scale(1.08);
+  opacity: 0.9;
+}
+
+.sheet-inner-container {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0 24px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Katta Kvadrat Muqova */
+.sheet-artwork-wrapper {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 1 / 1;
+  max-height: min(44vh, 380px);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55), 0 4px 20px rgba(0, 0, 0, 0.35);
+  margin: 6px auto 18px auto;
+  transition: transform 0.4s var(--ios-spring-easing);
+}
+
+.sheet-artwork-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.1);
+  transition: transform 0.4s var(--ios-spring-easing);
+}
+
+/* Trek Ma'lumotlari */
+.sheet-track-info {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.sheet-text-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheet-track-title {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  margin-bottom: 6px;
+}
+
+.sheet-artist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sheet-track-artist {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.anti-repeat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #34c759;
+  background: rgba(52, 199, 89, 0.14);
+  border: 1px solid rgba(52, 199, 89, 0.25);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.sheet-quick-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.sheet-round-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.sheet-round-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.06);
+}
+.sheet-round-btn:active {
+  transform: scale(0.92);
+  background: var(--ios-accent);
+}
+
+/* Progress Slider */
+.sheet-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ios-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #ffffff var(--progress-percent, 0%), rgba(255, 255, 255, 0.22) var(--progress-percent, 0%));
+  outline: none;
+  cursor: pointer;
+  transition: height 0.15s ease;
+}
+
+.ios-slider:hover {
+  height: 7px;
+}
+
+.ios-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.ios-slider:active::-webkit-slider-thumb {
+  transform: scale(1.3);
+}
+
+.sheet-time-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Boshqaruv Tugmalari */
+.sheet-main-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  margin-bottom: 14px;
+}
+
+.control-secondary-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+.control-secondary-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.control-secondary-btn.active {
+  color: var(--ios-accent);
+  background: rgba(250, 45, 72, 0.18);
+}
+
+.control-nav-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.control-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.control-nav-btn:active {
+  transform: scale(0.88);
+}
+
+.control-play-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.22);
+  transition: transform 0.15s var(--ios-spring-easing), box-shadow 0.2s ease;
+}
+.control-play-btn:hover {
+  box-shadow: 0 10px 28px rgba(255, 255, 255, 0.35);
+  transform: scale(1.03);
+}
+.control-play-btn:active {
+  transform: scale(0.93);
+}
+
+/* Ovoz bo'limi */
+.sheet-volume-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+
+#fullVolumeSlider {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.85) var(--vol-percent, 80%), rgba(255, 255, 255, 0.2) var(--vol-percent, 80%));
+}
+
+/* Yashirin YouTube Player Slot - Off-screen emas, viewportda lekin ko'rinmas va tegilmas */
+.hidden-yt-player-slot {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  opacity: 0.001;
+  pointer-events: none;
+  z-index: -999;
+  overflow: hidden;
+}
+
+/* iOS Toast Pill */
+.ios-toast-pill {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 20px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 30, 0.9);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13.5px;
+  font-weight: 600;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: toastPop 0.3s var(--ios-spring-easing);
+}
+
+@keyframes toastPop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   iOS Davlat Tanlash (Country Selector) & Action Sheet
+   ========================================================================== */
+
+.flex-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.ios-country-btn {
+  background: var(--ios-bg-card-secondary);
+  color: var(--ios-text-primary);
+  border: 1px solid var(--ios-separator);
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  margin-bottom: 4px;
+}
+
+.ios-country-btn:active {
+  transform: scale(0.94);
+}
+
+.ios-action-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 700;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.ios-action-sheet {
+  background: var(--ios-bg-card);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px calc(env(safe-area-inset-bottom, 16px) + 12px) 16px;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.3);
+  animation: slideUpSpring 0.35s var(--ios-spring-easing);
+}
+
+.action-sheet-header {
+  text-align: center;
+  padding: 4px 10px 14px 10px;
+  border-bottom: 1px solid var(--ios-separator);
+}
+
+.action-sheet-handle {
+  width: 36px;
+  height: 5px;
+  background: var(--ios-text-tertiary);
+  border-radius: 3px;
+  margin: 0 auto 10px auto;
+}
+
+.action-sheet-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.action-sheet-header p {
+  font-size: 12.5px;
+  color: var(--ios-text-secondary);
+}
+
+.country-list-scroll {
+  overflow-y: auto;
+  max-height: 50vh;
+  padding: 8px 0;
+}
+
+.country-option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.country-option-item:active {
+  background: var(--ios-bg-card-secondary);
+}
+
+.country-option-item.active {
+  color: var(--ios-accent);
+  font-weight: 700;
+}
+
+.country-option-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+}
+
+.country-option-flag {
+  font-size: 22px;
+}
+
+.country-check-icon {
+  color: var(--ios-accent);
+}
+
+.action-sheet-cancel-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--ios-bg-card-secondary);
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ios-accent);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.action-sheet-cancel-btn:active {
+  transform: scale(0.97);
+}

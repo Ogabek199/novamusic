@@ -1,0 +1,86 @@
+# ==============================================================================
+# Nuxt dev & build outputs
+# ==============================================================================
+.output/
+.data/
+.nuxt/
+.nitro/
+.cache/
+dist/
+.vercel/
+.netlify/
+*.tsbuildinfo
+.eslintcache
+coverage/
+
+# ==============================================================================
+# Node dependencies
+# ==============================================================================
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==============================================================================
+# Environment variables and API Secrets (HECH QACHON GITHUBGA CHIQMASIN)
+# ==============================================================================
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Maxfiy kalitlar va sertifikatlar
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.secret
+credentials.json
+service-account*.json
+client_secret*.json
+
+# ==============================================================================
+# AI Agent fayllari va maxfiy konfiguratsiyalar
+# ==============================================================================
+.agents
+.agents/
+.gemini
+.gemini/
+.system_generated
+.system_generated/
+brain
+brain/
+tasks
+tasks/
+scratch
+scratch/
+*.agent.json
+
+# ==============================================================================
+# IDE va Tizim fayllari
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.fleet/
+
+# ==============================================================================
+# Logs
+# ==============================================================================
+logs/
+*.log

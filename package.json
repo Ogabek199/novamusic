@@ -1,0 +1,31 @@
+{
+  "name": "youtube-music-clone",
+  "version": "1.0.0",
+  "description": "YouTube Music Web App with Unique Anti-Repeat Algorithm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "keywords": [
+    "youtube",
+    "music",
+    "pwa",
+    "anti-repeat"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nuxt/vite-builder": "^3.21.11",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@rolldown/binding-darwin-arm64": "^1.2.15",
+    "@types/node": "^26.6.5",
+    "nuxt": "^3.21.11",
+    "vue": "^3.5.44",
+    "vue-router": "^4.6.4"
+  }
+}
