@@ -30,8 +30,9 @@
     --ios-spring-duration: 0.45s;
   }
 
-  html, body {
+  html, body, #__nuxt {
     @apply w-full h-full overflow-hidden bg-black text-white select-none;
+    height: 100dvh;
     font-family: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }

@@ -30,6 +30,22 @@ onMounted(() => {
   initLang();
   initAntiRepeat();
   initYTPlayer();
+
+  const scrollContainer = document.getElementById('scrollContainer');
+  const iosNavbar = document.getElementById('iosNavbar');
+  if (scrollContainer && iosNavbar) {
+    scrollContainer.addEventListener(
+      'scroll',
+      () => {
+        if (scrollContainer.scrollTop > 25) {
+          iosNavbar.classList.add('scrolled');
+        } else {
+          iosNavbar.classList.remove('scrolled');
+        }
+      },
+      { passive: true }
+    );
+  }
 });
 </script>
 
