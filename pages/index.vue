@@ -20,29 +20,97 @@ const { t } = useI18n();
 const activeGenre = ref('all');
 const rawSongs = ref<Song[]>([]);
 const homeSearchQuery = ref('');
+const homeSearchResults = ref<Song[]>([]);
+const isHomeSearching = ref(false);
+const hasHomeSearched = ref(false);
+let homeSearchDebounceTimer: any = null;
+
 const isLoading = ref(true);
 const isLoadingMore = ref(false);
 const nextPageToken = ref<string | undefined>(undefined);
 
 // Filtered songs according to the Anti-Repeat engine & search query
 const displayedSongs = computed(() => {
-  let list = filterSongs(rawSongs.value);
-
-  if (homeSearchQuery.value.trim()) {
-    const q = homeSearchQuery.value.trim().toLowerCase();
-    list = list.filter(
+  const q = homeSearchQuery.value.trim().toLowerCase();
+  if (q) {
+    if (homeSearchResults.value.length > 0) {
+      return filterSongs(homeSearchResults.value);
+    }
+    if (hasHomeSearched.value && !isHomeSearching.value) {
+      return [];
+    }
+    // API qidiruvi javob qaytarguncha local rawSongs dan moslarini ko'rsatib turish
+    return filterSongs(rawSongs.value).filter(
       (s) =>
         s.title.toLowerCase().includes(q) ||
         s.channelTitle.toLowerCase().includes(q)
     );
   }
 
-  return list;
+  return filterSongs(rawSongs.value);
 });
 
 const isAllHeard = computed(() => {
-  return !isLoading.value && rawSongs.value.length > 0 && displayedSongs.value.length === 0;
+  return (
+    !homeSearchQuery.value.trim() &&
+    !isLoading.value &&
+    rawSongs.value.length > 0 &&
+    displayedSongs.value.length === 0
+  );
 });
+
+const performHomeSearch = async () => {
+  const q = homeSearchQuery.value.trim();
+  if (!q) {
+    homeSearchResults.value = [];
+    hasHomeSearched.value = false;
+    isHomeSearching.value = false;
+    return;
+  }
+
+  isHomeSearching.value = true;
+  hasHomeSearched.value = true;
+  try {
+    const results = await searchSongs(q, region.value);
+    if (homeSearchQuery.value.trim() === q) {
+      homeSearchResults.value = results;
+    }
+  } catch (err) {
+    console.error('Home search error:', err);
+  } finally {
+    if (homeSearchQuery.value.trim() === q) {
+      isHomeSearching.value = false;
+    }
+  }
+};
+
+watch(homeSearchQuery, (newVal) => {
+  if (homeSearchDebounceTimer) clearTimeout(homeSearchDebounceTimer);
+  const q = newVal.trim();
+  if (!q) {
+    homeSearchResults.value = [];
+    hasHomeSearched.value = false;
+    isHomeSearching.value = false;
+    return;
+  }
+
+  homeSearchDebounceTimer = setTimeout(() => {
+    performHomeSearch();
+  }, 400);
+});
+
+const onSearchSubmit = () => {
+  if (homeSearchDebounceTimer) clearTimeout(homeSearchDebounceTimer);
+  performHomeSearch();
+};
+
+const onClearSearch = () => {
+  if (homeSearchDebounceTimer) clearTimeout(homeSearchDebounceTimer);
+  homeSearchQuery.value = '';
+  homeSearchResults.value = [];
+  hasHomeSearched.value = false;
+  isHomeSearching.value = false;
+};
 
 const loadSongs = async (reset = true) => {
   if (reset) {
@@ -78,11 +146,10 @@ const loadSongs = async (reset = true) => {
 const onSelectGenre = (genreId: string) => {
   if (activeGenre.value === genreId) return;
   activeGenre.value = genreId;
+  if (homeSearchQuery.value) {
+    onClearSearch();
+  }
   loadSongs(true);
-};
-
-const onClearSearch = () => {
-  homeSearchQuery.value = '';
 };
 
 const loadMore = () => {
@@ -98,7 +165,11 @@ const shuffleAndPlay = () => {
 };
 
 watch(region, () => {
-  loadSongs(true);
+  if (homeSearchQuery.value.trim()) {
+    performHomeSearch();
+  } else {
+    loadSongs(true);
+  }
 });
 
 onMounted(() => {
@@ -106,7 +177,13 @@ onMounted(() => {
 });
 
 defineExpose({
-  refresh: () => loadSongs(true)
+  refresh: () => {
+    if (homeSearchQuery.value.trim()) {
+      performHomeSearch();
+    } else {
+      loadSongs(true);
+    }
+  }
 });
 </script>
 
@@ -146,6 +223,7 @@ defineExpose({
           autocomplete="off"
           enterkeyhint="search"
           aria-label="Bosh sahifada musiqa qidirish"
+          @keyup.enter="onSearchSubmit"
         />
         <button
           v-if="homeSearchQuery"
@@ -171,7 +249,8 @@ defineExpose({
       <div class="status-left">
         <span class="status-dot"></span>
         <span class="status-text" id="statusTrackCount">
-          <span v-if="isLoading">{{ t('songs_filtering') }}</span>
+          <span v-if="isLoading || isHomeSearching">{{ isHomeSearching ? t('search_loading') : t('songs_filtering') }}</span>
+          <span v-else-if="homeSearchQuery.trim()">{{ t('search_results_count', { count: displayedSongs.length }) }}</span>
           <span v-else>{{ t('songs_count', { count: displayedSongs.length }) }}</span>
         </span>
       </div>
@@ -194,7 +273,7 @@ defineExpose({
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-if="isLoading" class="songs-grid skeleton-container">
+    <div v-if="isLoading || (isHomeSearching && displayedSongs.length === 0)" class="songs-grid skeleton-container">
       <div v-for="n in 8" :key="n" class="skeleton-row">
         <div class="skeleton-box"></div>
         <div class="skeleton-lines">
@@ -248,7 +327,7 @@ defineExpose({
     </div>
 
     <!-- Load More Button -->
-    <div v-if="nextPageToken && displayedSongs.length > 0" class="load-more-section">
+    <div v-if="!homeSearchQuery.trim() && nextPageToken && displayedSongs.length > 0" class="load-more-section">
       <button
         class="ios-load-more-btn"
         :disabled="isLoadingMore"

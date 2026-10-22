@@ -30,7 +30,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     search_placeholder: "Qo'shiq, san'atkor yoki janr...",
     search_home_placeholder: "Musiqa, qo'shiqchi yoki janrni qidiring...",
     loading_more_songs: "Ko'proq musiqalar yuklanmoqda...",
-    all_songs_loaded: "Barcha musiqalar yuklandi ✨",
+    search_loading: 'Qidirilmoqda...',
+    search_results_count: '{count} ta musiqa topildi',
     search_initial_hint: "Sevimli ijrochingiz yoki musiqangizni qidiring. Eshitilganlar bu yerda ham avtomatik chiqarib tashlanadi.",
 
     history_sub: 'ESHITILGANLAR',
@@ -135,7 +136,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     search_placeholder: 'Трек, артист или жанр...',
     search_home_placeholder: 'Поиск трека, исполнителя или жанра...',
     loading_more_songs: 'Загрузка треков...',
-    all_songs_loaded: 'Все треки загружены ✨',
+    search_loading: 'Поиск...',
+    search_results_count: 'Найдено {count} треков',
     search_initial_hint: 'Ищите любимых исполнителей или треки. Прослушанные треки автоматически исключаются.',
 
     history_sub: 'ПРОСЛУШАННЫЕ',
@@ -240,7 +242,8 @@ export const TRANSLATIONS: Record<AppLanguage, Record<string, string>> = {
     search_placeholder: 'Song, artist or genre...',
     search_home_placeholder: 'Search songs, artists, or genres...',
     loading_more_songs: 'Loading more songs...',
-    all_songs_loaded: 'All tracks loaded ✨',
+    search_loading: 'Searching...',
+    search_results_count: '{count} songs found',
     search_initial_hint: 'Search for your favorite artist or songs. Listened tracks are automatically excluded.',
 
     history_sub: 'LISTENED TRACKS',

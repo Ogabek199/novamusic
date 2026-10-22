@@ -27,6 +27,84 @@ const {
 const { markAsHeard, hideSong, isHeard } = useAntiRepeat();
 const { t } = useI18n();
 
+const onClose = () => {
+  closeFullPlayer();
+};
+
+// Gesture handling: telefonda yondan tortsa yoki pastga sursa yopish
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+const dragTranslateX = ref(0);
+const dragTranslateY = ref(0);
+const isDragging = ref(false);
+
+const onTouchStart = (e: TouchEvent) => {
+  if (e.touches.length !== 1) return;
+  const target = e.target as HTMLElement;
+  // Sliders yoki tugmalarni bosganda surishni to'xtatish
+  if (target && (target.tagName === 'INPUT' || target.closest('button') || target.closest('input'))) {
+    return;
+  }
+  touchStartX.value = e.touches[0].clientX;
+  touchStartY.value = e.touches[0].clientY;
+  isDragging.value = false;
+  dragTranslateX.value = 0;
+  dragTranslateY.value = 0;
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  if (touchStartX.value === 0 && touchStartY.value === 0) return;
+  const currentX = e.touches[0].clientX;
+  const currentY = e.touches[0].clientY;
+  const diffX = currentX - touchStartX.value;
+  const diffY = currentY - touchStartY.value;
+
+  // Yondan o'ngga surish (diffX > 15) yoki pastga surish (diffY > 15)
+  if (diffX > 15 || diffY > 15) {
+    isDragging.value = true;
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      dragTranslateX.value = Math.max(0, diffX);
+      dragTranslateY.value = 0;
+    } else {
+      dragTranslateX.value = 0;
+      dragTranslateY.value = Math.max(0, diffY);
+    }
+  }
+};
+
+const onTouchEnd = () => {
+  if (isDragging.value) {
+    // 70px dan ko'proq yondan surilsa yoki 90px dan ko'p pastga surilsa yopiladi
+    if (dragTranslateX.value > 70 || dragTranslateY.value > 90) {
+      closeFullPlayer();
+    }
+  }
+  isDragging.value = false;
+  dragTranslateX.value = 0;
+  dragTranslateY.value = 0;
+  touchStartX.value = 0;
+  touchStartY.value = 0;
+};
+
+const sheetStyle = computed(() => {
+  if (!isFullPlayerOpen.value) return {};
+  if (isDragging.value) {
+    if (dragTranslateX.value > 0) {
+      return {
+        transform: `translate3d(${dragTranslateX.value}px, 0, 0)`,
+        transition: 'none'
+      };
+    }
+    if (dragTranslateY.value > 0) {
+      return {
+        transform: `translate3d(0, ${dragTranslateY.value}px, 0)`,
+        transition: 'none'
+      };
+    }
+  }
+  return {};
+});
+
 const onSliderChange = (e: Event) => {
   const target = e.target as HTMLInputElement;
   const newSecs = (parseFloat(target.value) / 100) * (duration.value || 1);
@@ -55,8 +133,13 @@ const onHideSong = () => {
 <template>
   <div
     class="ios-full-player-sheet"
-    :class="{ open: isFullPlayerOpen }"
+    :class="{ open: isFullPlayerOpen, dragging: isDragging }"
+    :style="sheetStyle"
     id="fullPlayerSheet"
+    @touchstart="onTouchStart"
+    @touchmove="onTouchMove"
+    @touchend="onTouchEnd"
+    @touchcancel="onTouchEnd"
   >
     <!-- Orqa fon bluri va rang gradiyenti -->
     <div class="sheet-backdrop-blur"></div>
@@ -75,7 +158,7 @@ const onHideSong = () => {
       role="button"
       tabindex="0"
       title="Yopish"
-      @click="closeFullPlayer"
+      @click="onClose"
     >
       <div class="sheet-drag-handle"></div>
     </div>

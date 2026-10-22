@@ -30,6 +30,31 @@ let playedSeconds = 0;
 let hasMarkedHeard = false;
 let pendingSong: Song | null = null;
 let pendingPlaylist: Song[] | null = null;
+let userInitiatedPause = false;
+let silentAudioEl: HTMLAudioElement | null = null;
+const SILENT_AUDIO_URI = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+const ensureSilentAudio = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    if (!silentAudioEl) {
+      silentAudioEl = new Audio(SILENT_AUDIO_URI);
+      silentAudioEl.loop = true;
+      silentAudioEl.preload = 'auto';
+      silentAudioEl.setAttribute('playsinline', '');
+      silentAudioEl.setAttribute('webkit-playsinline', '');
+    }
+    silentAudioEl.play().catch(() => {});
+  } catch (e) {}
+};
+
+const pauseSilentAudio = () => {
+  if (silentAudioEl) {
+    try {
+      silentAudioEl.pause();
+    } catch (e) {}
+  }
+};
 
 export const useYouTubePlayer = () => {
   const { markAsHeard, isHeard, isHidden } = useAntiRepeat();
@@ -53,15 +78,37 @@ export const useYouTubePlayer = () => {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: song.title,
         artist: song.channelTitle,
-        album: 'YouTube Music - Anti-Repeat',
+        album: 'NovaMusic - Takrorlanmas',
         artwork: [
           { src: song.thumbnail, sizes: '512x512', type: 'image/jpeg' },
           { src: song.thumbnail, sizes: '128x128', type: 'image/jpeg' }
         ]
       });
 
-      navigator.mediaSession.setActionHandler('play', () => togglePlay());
-      navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+      navigator.mediaSession.playbackState = isPlaying.value ? 'playing' : 'paused';
+
+      navigator.mediaSession.setActionHandler('play', () => {
+        userInitiatedPause = false;
+        ensureSilentAudio();
+        if (ytPlayer && isPlayerReady) {
+          try {
+            ytPlayer.playVideo();
+          } catch (e) {}
+        }
+        isPlaying.value = true;
+        startProgressTimer();
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        userInitiatedPause = true;
+        pauseSilentAudio();
+        if (ytPlayer && isPlayerReady) {
+          try {
+            ytPlayer.pauseVideo();
+          } catch (e) {}
+        }
+        isPlaying.value = false;
+        stopProgressTimer();
+      });
       navigator.mediaSession.setActionHandler('previoustrack', () => prev());
       navigator.mediaSession.setActionHandler('nexttrack', () => next());
     }
@@ -146,13 +193,31 @@ export const useYouTubePlayer = () => {
             // YT.PlayerState: 1 = PLAYING, 2 = PAUSED, 0 = ENDED, 3 = BUFFERING
             if (event.data === 1) {
               isPlaying.value = true;
+              userInitiatedPause = false;
+              ensureSilentAudio();
+              if (currentSong.value) updateMediaSession(currentSong.value);
               startProgressTimer();
             } else if (event.data === 2) {
+              // Agar user o'zi to'xtatmagan bo'lsa (telefon o'chishi yoki appdan chiqishda avto-pause bo'lsa):
+              if (!userInitiatedPause && isPlaying.value) {
+                ensureSilentAudio();
+                setTimeout(() => {
+                  if (!userInitiatedPause && ytPlayer && isPlayerReady) {
+                    try {
+                      ytPlayer.playVideo();
+                    } catch (e) {}
+                  }
+                }, 100);
+                return;
+              }
+
               isPlaying.value = false;
+              pauseSilentAudio();
               stopProgressTimer();
             } else if (event.data === 0) {
               // Ended
               isPlaying.value = false;
+              pauseSilentAudio();
               stopProgressTimer();
               if (currentSong.value && !hasMarkedHeard) {
                 markAsHeard(currentSong.value, playedSeconds);
@@ -173,6 +238,7 @@ export const useYouTubePlayer = () => {
             console.warn('YouTube Player error code:', event.data);
             stopProgressTimer();
             isPlaying.value = false;
+            pauseSilentAudio();
 
             // Error 101 or 150: Embed copyright not allowed
             if (event.data === 150 || event.data === 101) {
@@ -205,6 +271,7 @@ export const useYouTubePlayer = () => {
     hasMarkedHeard = false;
     currentTime.value = 0;
     duration.value = song.durationSeconds || 0;
+    userInitiatedPause = false;
 
     if (newPlaylist && newPlaylist.length > 0) {
       playlist.value = [...newPlaylist];
@@ -230,6 +297,7 @@ export const useYouTubePlayer = () => {
     }
 
     try {
+      ensureSilentAudio();
       ytPlayer.loadVideoById(song.id);
       isPlaying.value = true;
       updateMediaSession(song);
@@ -254,10 +322,14 @@ export const useYouTubePlayer = () => {
 
     try {
       if (isPlaying.value) {
+        userInitiatedPause = true;
         ytPlayer.pauseVideo();
         isPlaying.value = false;
+        pauseSilentAudio();
         stopProgressTimer();
       } else {
+        userInitiatedPause = false;
+        ensureSilentAudio();
         ytPlayer.playVideo();
         isPlaying.value = true;
         startProgressTimer();
@@ -343,13 +415,27 @@ export const useYouTubePlayer = () => {
 
   const openFullPlayer = () => {
     isFullPlayerOpen.value = true;
+    if (typeof window !== 'undefined') {
+      try {
+        window.history.pushState({ modal: 'fullPlayer' }, '');
+      } catch (e) {}
+    }
   };
 
-  const closeFullPlayer = () => {
+  const closeFullPlayer = (updateHistory = true) => {
     isFullPlayerOpen.value = false;
+    if (updateHistory && typeof window !== 'undefined') {
+      try {
+        if (window.history.state?.modal === 'fullPlayer') {
+          window.history.back();
+        }
+      } catch (e) {}
+    }
   };
 
   const closePlayer = () => {
+    userInitiatedPause = true;
+    pauseSilentAudio();
     if (ytPlayer && isPlayerReady) {
       try {
         ytPlayer.stopVideo();
@@ -399,15 +485,53 @@ export const useYouTubePlayer = () => {
   };
 };
 
-if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-  (window as any).__YT_PLAYER__ = {
-    currentSong,
-    isPlaying,
-    currentTime,
-    duration,
-    volume,
-    isShuffle,
-    isLoop,
-    isFullPlayerOpen
-  };
+// Global browser listeners for Android edge-swipe back & background playback persistence
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  // 1. Android side-swipe / hardware back button handling
+  window.addEventListener('popstate', () => {
+    if (isFullPlayerOpen.value) {
+      isFullPlayerOpen.value = false;
+    }
+  });
+
+  // 2. AudioSession API for mobile OS audio focus
+  if ('audioSession' in navigator) {
+    try {
+      (navigator as any).audioSession.type = 'playback';
+    } catch (e) {}
+  }
+
+  // 3. Keep playing when phone locks or app minimizes
+  document.addEventListener(
+    'visibilitychange',
+    (e) => {
+      if (isPlaying.value && !userInitiatedPause) {
+        e.stopImmediatePropagation();
+        ensureSilentAudio();
+        setTimeout(() => {
+          if (!userInitiatedPause && ytPlayer && isPlayerReady) {
+            try {
+              if (ytPlayer.getPlayerState() !== 1) {
+                ytPlayer.playVideo();
+              }
+            } catch (err) {}
+          }
+        }, 120);
+      }
+    },
+    true
+  );
+
+  if (process.env.NODE_ENV !== 'production') {
+    (window as any).__YT_PLAYER__ = {
+      currentSong,
+      isPlaying,
+      currentTime,
+      duration,
+      volume,
+      isShuffle,
+      isLoop,
+      isFullPlayerOpen
+    };
+  }
 }
