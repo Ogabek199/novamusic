@@ -1517,6 +1517,7 @@ html, body, #__nuxt {
 .orange-badge { background: linear-gradient(135deg, #ff9500, #ff3b30) !important; }
 .green-badge { background: linear-gradient(135deg, #34c759, #30d158) !important; }
 .gray-badge { background: linear-gradient(135deg, #8e8e93, #636366) !important; }
+.amber-badge { background: linear-gradient(135deg, #ff9f0a, #ff375f) !important; }
 
 .cell-label-text {
   display: flex !important;
@@ -2543,16 +2544,16 @@ html, body, #__nuxt {
   );
 }
 
-/* Yashirin YouTube Player Slot - Off-screen emas, viewportda lekin ko'rinmas va tegilmas */
+/* Yashirin YouTube Player Slot - viewportda lekin ko'rinmas va tegilmas */
 .hidden-yt-player-slot {
   position: fixed;
   bottom: 0;
   right: 0;
-  width: 2px;
-  height: 2px;
-  opacity: 1;
+  width: 200px;
+  height: 200px;
+  opacity: 0.001;
   pointer-events: none;
-  z-index: -1;
+  z-index: -999;
   overflow: hidden;
 }
 
@@ -3063,4 +3064,169 @@ html, body, #__nuxt {
   color: #ff3b30;
   background: rgba(255, 59, 48, 0.12);
 }
+
+/* iOS Toggle Switch */
+.ios-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 30px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ios-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ios-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(120, 120, 128, 0.32);
+  transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 30px;
+}
+
+.ios-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25), 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.ios-switch input:checked + .ios-switch-slider {
+  background-color: #34c759;
+}
+
+.ios-switch input:checked + .ios-switch-slider:before {
+  transform: translateX(20px);
+}
+
+/* Lock Screen Tip Box in Settings */
+.lock-screen-tip-box {
+  background: rgba(255, 159, 10, 0.08) !important;
+  border-left: 3px solid #ff9f0a;
+  padding: 10px 14px !important;
+  border-radius: 8px;
+  line-height: 1.45 !important;
+  color: var(--ios-text-secondary) !important;
+  margin-top: 8px !important;
+}
+
+.lock-screen-tip-box strong {
+  color: #ff9f0a;
+}
+
+/* OLED Black Screen Overlay (0% batareya sarfi, ekran o'chmasdan davom etish) */
+.oled-black-screen-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(env(safe-area-inset-top, 24px) + 20px) 24px calc(env(safe-area-inset-bottom, 20px) + 24px);
+  user-select: none;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease;
+}
+
+.oled-black-screen-overlay * {
+  pointer-events: none;
+}
+
+.oled-top-hint {
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+.oled-center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.oled-time-display {
+  font-size: 4rem;
+  font-weight: 200;
+  letter-spacing: -1.5px;
+  color: rgba(255, 255, 255, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.oled-song-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  max-width: 85vw;
+}
+
+.oled-song-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.oled-song-artist {
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.oled-pulse-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  height: 16px;
+  margin-top: 6px;
+}
+
+.oled-pulse-bar {
+  width: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  animation: oledPulse 1.2s ease-in-out infinite alternate;
+}
+
+.oled-pulse-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+.oled-pulse-bar:nth-child(2) { height: 16px; animation-delay: 0.3s; }
+.oled-pulse-bar:nth-child(3) { height: 10px; animation-delay: 0.15s; }
+
+@keyframes oledPulse {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1); }
+}
+
+.oled-hint-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.2px;
+}
+
 

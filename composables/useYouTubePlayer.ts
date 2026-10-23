@@ -31,29 +31,66 @@ let hasMarkedHeard = false;
 let pendingSong: Song | null = null;
 let pendingPlaylist: Song[] | null = null;
 let userInitiatedPause = false;
-let silentAudioEl: HTMLAudioElement | null = null;
-const SILENT_AUDIO_URI = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 
-const ensureSilentAudio = () => {
-  if (typeof window === 'undefined') return;
+// Screen WakeLock & AMOLED Black Screen state
+let wakeLockSentinel: any = null;
+const isWakeLockEnabled = ref<boolean>(true);
+const isOledBlackScreen = ref<boolean>(false);
+
+if (typeof window !== 'undefined') {
   try {
-    if (!silentAudioEl) {
-      silentAudioEl = new Audio(SILENT_AUDIO_URI);
-      silentAudioEl.loop = true;
-      silentAudioEl.preload = 'auto';
-      silentAudioEl.setAttribute('playsinline', '');
-      silentAudioEl.setAttribute('webkit-playsinline', '');
+    const saved = localStorage.getItem(STORAGE_KEYS.KEEP_SCREEN_ON);
+    if (saved !== null) {
+      isWakeLockEnabled.value = saved === 'true';
     }
-    silentAudioEl.play().catch(() => {});
   } catch (e) {}
+}
+
+const requestWakeLock = async () => {
+  if (!isWakeLockEnabled.value) return;
+  if (typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
+  try {
+    if (!wakeLockSentinel) {
+      wakeLockSentinel = await (navigator as any).wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', () => {
+        wakeLockSentinel = null;
+      });
+    }
+  } catch (e) {
+    // Battery saver or background state
+  }
 };
 
-const pauseSilentAudio = () => {
-  if (silentAudioEl) {
+const releaseWakeLock = () => {
+  if (wakeLockSentinel) {
     try {
-      silentAudioEl.pause();
+      wakeLockSentinel.release();
+    } catch (e) {}
+    wakeLockSentinel = null;
+  }
+};
+
+const setKeepScreenOn = (val: boolean) => {
+  isWakeLockEnabled.value = val;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEYS.KEEP_SCREEN_ON, String(val));
     } catch (e) {}
   }
+  if (val && isPlaying.value) {
+    requestWakeLock();
+  } else if (!val) {
+    releaseWakeLock();
+  }
+};
+
+const openOledBlackScreen = () => {
+  isOledBlackScreen.value = true;
+  requestWakeLock();
+};
+
+const closeOledBlackScreen = () => {
+  isOledBlackScreen.value = false;
 };
 
 export const useYouTubePlayer = () => {
@@ -109,7 +146,6 @@ export const useYouTubePlayer = () => {
 
       navigator.mediaSession.setActionHandler('play', () => {
         userInitiatedPause = false;
-        ensureSilentAudio();
         if (ytPlayer && isPlayerReady) {
           try {
             ytPlayer.playVideo();
@@ -118,11 +154,11 @@ export const useYouTubePlayer = () => {
         isPlaying.value = true;
         navigator.mediaSession.playbackState = 'playing';
         startProgressTimer();
+        requestWakeLock();
       });
 
       navigator.mediaSession.setActionHandler('pause', () => {
         userInitiatedPause = true;
-        pauseSilentAudio();
         if (ytPlayer && isPlayerReady) {
           try {
             ytPlayer.pauseVideo();
@@ -131,6 +167,7 @@ export const useYouTubePlayer = () => {
         isPlaying.value = false;
         navigator.mediaSession.playbackState = 'paused';
         stopProgressTimer();
+        releaseWakeLock();
       });
 
       navigator.mediaSession.setActionHandler('previoustrack', () => {
@@ -214,8 +251,8 @@ export const useYouTubePlayer = () => {
       if (!el) return;
 
       ytPlayer = new window.YT.Player(containerId, {
-        height: '1',
-        width: '1',
+        height: '200',
+        width: '200',
         videoId: '',
         playerVars: {
           autoplay: 1,
@@ -248,31 +285,21 @@ export const useYouTubePlayer = () => {
             if (event.data === 1) {
               isPlaying.value = true;
               userInitiatedPause = false;
-              ensureSilentAudio();
               if (currentSong.value) updateMediaSession(currentSong.value);
               startProgressTimer();
+              requestWakeLock();
             } else if (event.data === 2) {
-              // Agar user o'zi to'xtatmagan bo'lsa (telefon o'chishi yoki appdan chiqishda avto-pause bo'lsa):
-              if (!userInitiatedPause && isPlaying.value) {
-                ensureSilentAudio();
-                setTimeout(() => {
-                  if (!userInitiatedPause && ytPlayer && isPlayerReady) {
-                    try {
-                      ytPlayer.playVideo();
-                    } catch (e) {}
-                  }
-                }, 100);
-                return;
-              }
-
               isPlaying.value = false;
-              pauseSilentAudio();
               stopProgressTimer();
+              releaseWakeLock();
+              if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
+              }
             } else if (event.data === 0) {
               // Ended
               isPlaying.value = false;
-              pauseSilentAudio();
               stopProgressTimer();
+              releaseWakeLock();
               if (currentSong.value && !hasMarkedHeard) {
                 markAsHeard(currentSong.value, playedSeconds);
                 hasMarkedHeard = true;
@@ -292,7 +319,7 @@ export const useYouTubePlayer = () => {
             console.warn('YouTube Player error code:', event.data);
             stopProgressTimer();
             isPlaying.value = false;
-            pauseSilentAudio();
+            releaseWakeLock();
 
             // Error 101 or 150: Embed copyright not allowed
             if (event.data === 150 || event.data === 101) {
@@ -351,7 +378,6 @@ export const useYouTubePlayer = () => {
     }
 
     try {
-      ensureSilentAudio();
       ytPlayer.loadVideoById(song.id);
       try {
         ytPlayer.playVideo();
@@ -360,6 +386,7 @@ export const useYouTubePlayer = () => {
       userInitiatedPause = false;
       updateMediaSession(song);
       startProgressTimer();
+      requestWakeLock();
     } catch (e) {
       console.warn('Error loading video in YT Player', e);
     }
@@ -383,17 +410,17 @@ export const useYouTubePlayer = () => {
         userInitiatedPause = true;
         ytPlayer.pauseVideo();
         isPlaying.value = false;
-        pauseSilentAudio();
         stopProgressTimer();
+        releaseWakeLock();
         if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
           navigator.mediaSession.playbackState = 'paused';
         }
       } else {
         userInitiatedPause = false;
-        ensureSilentAudio();
         ytPlayer.playVideo();
         isPlaying.value = true;
         startProgressTimer();
+        requestWakeLock();
         if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
           navigator.mediaSession.playbackState = 'playing';
         }
@@ -518,7 +545,8 @@ export const useYouTubePlayer = () => {
 
   const closePlayer = () => {
     userInitiatedPause = true;
-    pauseSilentAudio();
+    releaseWakeLock();
+    closeOledBlackScreen();
     if (ytPlayer && isPlayerReady) {
       try {
         ytPlayer.stopVideo();
@@ -551,6 +579,8 @@ export const useYouTubePlayer = () => {
     isShuffle,
     isLoop,
     isFullPlayerOpen,
+    isWakeLockEnabled,
+    isOledBlackScreen,
     formattedCurrentTime,
     formattedDuration,
     initYTPlayer,
@@ -564,7 +594,10 @@ export const useYouTubePlayer = () => {
     toggleLoop,
     openFullPlayer,
     closeFullPlayer,
-    closePlayer
+    closePlayer,
+    setKeepScreenOn,
+    openOledBlackScreen,
+    closeOledBlackScreen
   };
 };
 
@@ -584,26 +617,21 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     } catch (e) {}
   }
 
-  // 3. Keep playing when phone locks or app minimizes
-  document.addEventListener(
-    'visibilitychange',
-    (e) => {
+  // 3. Keep playing when returning to app / unlocking screen
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
       if (isPlaying.value && !userInitiatedPause) {
-        e.stopImmediatePropagation();
-        ensureSilentAudio();
-        setTimeout(() => {
-          if (!userInitiatedPause && ytPlayer && isPlayerReady) {
-            try {
-              if (ytPlayer.getPlayerState() !== 1) {
-                ytPlayer.playVideo();
-              }
-            } catch (err) {}
-          }
-        }, 120);
+        requestWakeLock();
+        if (ytPlayer && isPlayerReady) {
+          try {
+            if (ytPlayer.getPlayerState() !== 1) {
+              ytPlayer.playVideo();
+            }
+          } catch (err) {}
+        }
       }
-    },
-    true
-  );
+    }
+  });
 
   if (process.env.NODE_ENV !== 'production') {
     (window as any).__YT_PLAYER__ = {

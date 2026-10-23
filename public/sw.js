@@ -1,9 +1,10 @@
-const CACHE_NAME = 'novamusic-pwa-v5';
+const CACHE_NAME = 'novamusic-pwa-v7';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
   '/icons/apple-touch-icon-180.png',
   '/icons/icon-192.png',
+  '/icons/icon-maskable-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',
   '/icons/favicon-32.png'
@@ -13,8 +14,14 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.allSettled(
+        STATIC_ASSETS.map((asset) =>
+          cache.add(asset).catch((err) => {
+            console.warn('[SW] Precache item skipped:', asset, err);
+          })
+        )
+      );
     })
   );
 });
@@ -45,6 +52,7 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   // Faqat GET so'rovlarni keshlaymiz
   if (event.request.method !== 'GET') return;
+  if (!event.request.url.startsWith('http')) return;
 
   const requestUrl = new URL(event.request.url);
 

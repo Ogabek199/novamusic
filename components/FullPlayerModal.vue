@@ -2,6 +2,7 @@
 import { useYouTubePlayer } from '~/composables/useYouTubePlayer';
 import { useAntiRepeat } from '~/composables/useAntiRepeat';
 import { useI18n } from '~/composables/useI18n';
+import { useToast } from '~/composables/useToast';
 
 const {
   currentSong,
@@ -12,6 +13,7 @@ const {
   isShuffle,
   isLoop,
   isFullPlayerOpen,
+  isOledBlackScreen,
   formattedCurrentTime,
   formattedDuration,
   togglePlay,
@@ -21,11 +23,40 @@ const {
   setVolume,
   toggleShuffle,
   toggleLoop,
-  closeFullPlayer
+  closeFullPlayer,
+  openOledBlackScreen,
+  closeOledBlackScreen
 } = useYouTubePlayer();
 
 const { markAsHeard, hideSong, isHeard } = useAntiRepeat();
 const { t } = useI18n();
+const { showToast } = useToast();
+
+const oledTime = ref('');
+let oledTimer: any = null;
+
+const updateOledTime = () => {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  oledTime.value = `${h}:${m}`;
+};
+
+const onOpenOled = () => {
+  updateOledTime();
+  if (oledTimer) clearInterval(oledTimer);
+  oledTimer = setInterval(updateOledTime, 1000);
+  openOledBlackScreen();
+  showToast(t('toast_oled_mode'));
+};
+
+const onCloseOled = () => {
+  if (oledTimer) {
+    clearInterval(oledTimer);
+    oledTimer = null;
+  }
+  closeOledBlackScreen();
+};
 
 const onClose = () => {
   closeFullPlayer();
@@ -46,6 +77,10 @@ onMounted(() => {
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('keydown', onKeyDown);
+  }
+  if (oledTimer) {
+    clearInterval(oledTimer);
+    oledTimer = null;
   }
 });
 
@@ -279,6 +314,17 @@ const onHideSong = () => {
               />
             </svg>
           </button>
+          <!-- OLED Qora Ekran (0% batareya, musiqa uzluksiz aytishi) -->
+          <button
+            class="sheet-round-btn"
+            id="fullOledBtn"
+            :title="t('oled_black_screen_btn')"
+            @click="onOpenOled"
+          >
+            <svg class="sf-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.3 2a10 10 0 0 0-1.9 19.8 10 10 0 0 0 11.6-11.6A10 10 0 0 1 12.3 2z" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -414,4 +460,41 @@ const onHideSong = () => {
       </div>
     </div>
   </div>
+
+  <!-- OLED Black Screen Overlay (0% batareya sarfi, ekran o'chmasdan davom etish) -->
+  <Teleport to="body">
+    <div
+      v-if="isOledBlackScreen"
+      class="oled-black-screen-overlay"
+      id="oledBlackScreen"
+      @click="onCloseOled"
+    >
+      <div class="oled-top-hint">
+        <span>🌙 {{ t('oled_black_screen_title') }}</span>
+      </div>
+
+      <div class="oled-center-content">
+        <div class="oled-time-display">{{ oledTime }}</div>
+
+        <div class="oled-song-meta" v-if="currentSong">
+          <span class="oled-song-title">{{ currentSong.title }}</span>
+          <span class="oled-song-artist">{{ currentSong.channelTitle }}</span>
+          <div class="oled-pulse-indicator" v-if="isPlaying">
+            <span class="oled-pulse-bar"></span>
+            <span class="oled-pulse-bar"></span>
+            <span class="oled-pulse-bar"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="oled-hint-text">
+        <svg class="sf-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <span>{{ t('oled_tap_to_wake') }}</span>
+      </div>
+    </div>
+  </Teleport>
 </template>

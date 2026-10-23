@@ -5,7 +5,61 @@ import { useI18n } from '~/composables/useI18n';
 // Global state across components and navigation
 const deferredPrompt = ref<any>(null);
 const isInstalled = ref(false);
+const isInstallModalOpen = ref(false);
 let isInitialized = false;
+
+// Immediate global capture of beforeinstallprompt
+if (typeof window !== 'undefined') {
+  // 1. Check if early script in <head> already captured it
+  if ((window as any).__deferredPrompt) {
+    deferredPrompt.value = (window as any).__deferredPrompt;
+  }
+
+  // 2. Add listener to catch it as soon as this module loads
+  window.addEventListener('beforeinstallprompt', (e: Event) => {
+    e.preventDefault();
+    deferredPrompt.value = e;
+    (window as any).__deferredPrompt = e;
+  });
+
+  // 3. Listen for successful installation
+  window.addEventListener('appinstalled', () => {
+    isInstalled.value = true;
+    deferredPrompt.value = null;
+    (window as any).__deferredPrompt = null;
+    isInstallModalOpen.value = false;
+  });
+}
+
+export function detectPlatform() {
+  if (typeof navigator === 'undefined') {
+    return { isIOS: false, isAndroid: false, isInApp: false, inAppName: '' };
+  }
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+  const isAndroid = /Android/i.test(ua);
+
+  let isInApp = false;
+  let inAppName = '';
+  if (/telegram/i.test(ua)) {
+    isInApp = true;
+    inAppName = 'Telegram';
+  } else if (/instagram/i.test(ua)) {
+    isInApp = true;
+    inAppName = 'Instagram';
+  } else if (/fbav|fb_iab/i.test(ua)) {
+    isInApp = true;
+    inAppName = 'Facebook';
+  } else if (/threads/i.test(ua)) {
+    isInApp = true;
+    inAppName = 'Threads';
+  } else if (/tiktok/i.test(ua)) {
+    isInApp = true;
+    inAppName = 'TikTok';
+  }
+
+  return { isIOS, isAndroid, isInApp, inAppName };
+}
 
 export function usePwaInstall() {
   const { showToast } = useToast();
@@ -19,10 +73,16 @@ export function usePwaInstall() {
     const checkInstalled = () => {
       const isStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true;
+        (window.navigator as any).standalone === true ||
+        document.referrer.includes('android-app://');
       isInstalled.value = isStandalone;
     };
     checkInstalled();
+
+    // Re-check early prompt if available
+    if ((window as any).__deferredPrompt && !deferredPrompt.value) {
+      deferredPrompt.value = (window as any).__deferredPrompt;
+    }
 
     // 2. Register Service Worker & auto-check updates
     if ('serviceWorker' in navigator) {
@@ -79,30 +139,19 @@ export function usePwaInstall() {
         }
       });
     }
-
-    // 3. Listen for beforeinstallprompt event (Android, Chrome, Edge)
-    window.addEventListener('beforeinstallprompt', (e: Event) => {
-      e.preventDefault();
-      deferredPrompt.value = e;
-    });
-
-    // 4. Listen for successful installation
-    window.addEventListener('appinstalled', () => {
-      isInstalled.value = true;
-      deferredPrompt.value = null;
-      showToast(t('pwa_install_btn') + ': OK!');
-    });
   };
 
   const installPwa = async () => {
     if (typeof window === 'undefined') return;
 
-    // Check if already installed
+    // 1. Check if already installed
     if (
       isInstalled.value ||
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true
+      (window.navigator as any).standalone === true ||
+      document.referrer.includes('android-app://')
     ) {
+      isInstalled.value = true;
       const msg =
         currentLang.value === 'ru'
           ? 'Приложение уже установлено!'
@@ -113,12 +162,27 @@ export function usePwaInstall() {
       return;
     }
 
-    // Native browser prompt available
-    if (deferredPrompt.value) {
+    // 2. Check if open inside Telegram or In-App browser
+    const platform = detectPlatform();
+    if (platform.isInApp) {
+      isInstallModalOpen.value = true;
+      const msg =
+        currentLang.value === 'ru'
+          ? `Вы открыли через ${platform.inAppName}. Нажмите (⋮) вверху и выберите «Открыть в Chrome»!`
+          : currentLang.value === 'en'
+            ? `Opened inside ${platform.inAppName}. Tap (⋮) above and choose 'Open in Chrome'!`
+            : `Siz ${platform.inAppName} ichidasiz. O'rnatish uchun yuqoridagi (⋮) menyudan «Chrome'da ochish»ni bosing!`;
+      showToast(msg, 5000);
+      return;
+    }
+
+    // 3. Native browser prompt available (Android Chrome / Edge)
+    const promptEvent = deferredPrompt.value || (window as any).__deferredPrompt;
+    if (promptEvent) {
       try {
-        deferredPrompt.value.prompt();
-        const choice = await deferredPrompt.value.userChoice;
-        if (choice.outcome === 'accepted') {
+        promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
+        if (choice && choice.outcome === 'accepted') {
           const msg =
             currentLang.value === 'ru'
               ? 'Установка приложения...'
@@ -126,41 +190,32 @@ export function usePwaInstall() {
                 ? 'Installing application...'
                 : "Ilova o'rnatilmoqda...";
           showToast(msg);
+          isInstalled.value = true;
+          isInstallModalOpen.value = false;
         }
         deferredPrompt.value = null;
+        (window as any).__deferredPrompt = null;
         return;
       } catch (err) {
-        console.error('[PWA] Error launching install prompt:', err);
+        console.warn('[PWA] Native prompt error, opening guide:', err);
       }
     }
 
-    // Fallback: iOS Safari instructions or browser menu guidance
-    const isIOS =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    // 4. Fallback: Open Visual Step-by-Step Install Guide Modal
+    isInstallModalOpen.value = true;
+  };
 
-    if (isIOS) {
-      const msg =
-        currentLang.value === 'ru'
-          ? 'В Safari нажмите 📤 «Поделиться» и выберите «На экран Домой»'
-          : currentLang.value === 'en'
-            ? "In Safari, tap 📤 Share and choose 'Add to Home Screen'"
-            : "Safari pastidagi 📤 'Ulashish' tugmasini bosing va 'Bosh ekranga qo'shish'ni tanlang";
-      showToast(msg);
-    } else {
-      const msg =
-        currentLang.value === 'ru'
-          ? 'В меню браузера (⋮) выберите «Установить приложение»'
-          : currentLang.value === 'en'
-            ? "In browser menu (⋮) select 'Install app' or 'Add to Home Screen'"
-            : "Brauzer menyusidan (⋮) 'Ilovani o'rnatish' bandini tanlang";
-      showToast(msg);
-    }
+  const closeInstallModal = () => {
+    isInstallModalOpen.value = false;
   };
 
   return {
     deferredPrompt,
     isInstalled,
+    isInstallModalOpen,
     initPwa,
-    installPwa
+    installPwa,
+    closeInstallModal,
+    detectPlatform
   };
 }

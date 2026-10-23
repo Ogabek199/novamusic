@@ -5,6 +5,7 @@ import { useAntiRepeat } from '~/composables/useAntiRepeat';
 import { useI18n } from '~/composables/useI18n';
 import { useToast } from '~/composables/useToast';
 import { usePwaInstall } from '~/composables/usePwaInstall';
+import { useYouTubePlayer } from '~/composables/useYouTubePlayer';
 import type { RetentionType, AppLanguage, Country } from '~/types/music';
 
 const emit = defineEmits<{
@@ -16,6 +17,7 @@ const { retention, region, totalListened, hiddenCount, setRetention } = useAntiR
 const { currentLang, setLang, t } = useI18n();
 const { showToast } = useToast();
 const { installPwa, isInstalled } = usePwaInstall();
+const { isWakeLockEnabled, setKeepScreenOn } = useYouTubePlayer();
 
 const isRetentionModalOpen = ref(false);
 const isLangModalOpen = ref(false);
@@ -161,7 +163,41 @@ const selectLanguage = (val: AppLanguage) => {
         {{ t('settings_group_hint') }}
       </div>
 
-      <!-- 2. Tarix va Xotira Statistikasi -->
+      <!-- 2. Fonda Tinglash va Ekran -->
+      <div class="group-header">{{ t('settings_group_playback') }}</div>
+      <div class="group-cells">
+        <div class="ios-cell">
+          <div class="cell-main-left">
+            <div class="cell-icon-badge amber-badge">
+              <svg class="sf-icon-xs" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"
+                />
+              </svg>
+            </div>
+            <div class="cell-label-text">
+              <span class="cell-title">{{ t('settings_keep_screen_label') }}</span>
+              <span class="cell-subtitle">{{ t('settings_keep_screen_sub') }}</span>
+            </div>
+          </div>
+          <div class="cell-value-action">
+            <label class="ios-switch">
+              <input
+                type="checkbox"
+                :checked="isWakeLockEnabled"
+                @change="setKeepScreenOn(!isWakeLockEnabled)"
+              />
+              <span class="ios-switch-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="group-footer-hint lock-screen-tip-box">
+        <strong>💡 {{ t('settings_lock_tip_title') }}</strong> {{ t('settings_lock_tip_desc') }}
+      </div>
+
+      <!-- 3. Tarix va Xotira Statistikasi -->
       <div class="group-header">{{ t('settings_group_stats') }}</div>
       <div class="group-cells">
         <div class="ios-cell readonly">

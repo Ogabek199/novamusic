@@ -25,7 +25,8 @@ export const STORAGE_KEYS = {
   LANG: 'ios_yt_music_lang_v1',
   LAST_SONG: 'ios_yt_music_last_song_v1',
   LAST_TIME: 'ios_yt_music_last_time_v1',
-  VOLUME: 'ios_yt_music_volume_v1'
+  VOLUME: 'ios_yt_music_volume_v1',
+  KEEP_SCREEN_ON: 'ios_yt_music_keep_screen_on_v1'
 };
 
 export const COUNTRIES: Country[] = [

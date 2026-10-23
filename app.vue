@@ -91,6 +91,9 @@ onMounted(() => {
       @cancel="isConfirmDialogOpen = false"
     />
 
+    <!-- PWA Install Guide Modal Action Sheet -->
+    <PwaInstallModal />
+
     <!-- Toast Notification Pill -->
     <Toast />
 
